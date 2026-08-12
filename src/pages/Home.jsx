@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
-import { BadgeCheck, CalendarDays, Clock3, House, Leaf, MapPin, ShieldCheck } from 'lucide-react';
-import { useParams } from 'react-router-dom';
-import originalHero from '../assets/air-duct-cleaning-hero.png';
+import { BadgeCheck, CalendarDays, Clock3, House, Leaf, ShieldCheck } from 'lucide-react';
+import originalHero from '../assets/pexels-hvac-technician.jpg';
 import residentialImage from '../assets/service/residential-duct-cleaning.png';
 import dryerImage from '../assets/service/dryer-vent-cleaning.png';
 import chimneyImage from '../assets/service/chimney-sweep.png';
@@ -24,18 +23,16 @@ const services = [
 ];
 
 export default function Home() {
-  const { state } = useParams();
-  const serviceState = state?.toLowerCase() === 'md' || !state ? 'Maryland' : state.toUpperCase();
   return <>
     <section className="original-hero">
       <div className="original-hero-copy">
-        <p className="original-eyebrow">Air care for your home</p>
-        <h1>Cleaner air.<br /><span>Made easy.</span></h1>
+        <p className="original-eyebrow">Maryland air duct cleaning</p>
+        <h1>Clean air starts<br />with a clean system.</h1>
         <p className="lede">Professional air duct, dryer vent, commercial duct and chimney services—with a simple booking experience from the first click.</p>
         <div className="hero-actions"><Link className="button original-primary" to="/booking">Get a free estimate</Link><a className="original-call" href="tel:+14435553827">Call (443) 555-3827</a></div>
-        <div className="mini-trust"><span>Free estimates</span><span>Easy scheduling</span><span>Dirty ducts? Easy Breezy.</span></div>
+        <p className="service-area-line">Serving Baltimore, Annapolis, Columbia, Rockville, and nearby communities.</p>
       </div>
-      <figure className="original-hero-image"><img src={originalHero} alt="Professional technician cleaning a ceiling air vent in a home" /><div className="service-area-card"><span className="service-area-icon"><MapPin /></span><div><small>Now serving</small><strong>{serviceState}</strong><span>and surrounding areas</span></div><Link to="/booking">Get an estimate →</Link></div></figure>
+      <figure className="original-hero-image"><img src={originalHero} alt="HVAC technician performing equipment maintenance" /></figure>
     </section>
     <section className="trust-rail">{trust.map(([Icon, title, text]) => <article key={title}><Icon /><div><strong>{title}</strong><span>{text}</span></div></article>)}</section>
     <section className="original-services">

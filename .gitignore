@@ -1,0 +1,4 @@
+data/business.json
+.env
+node_modules/
+dist/

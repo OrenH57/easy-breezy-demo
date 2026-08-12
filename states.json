@@ -1,0 +1,14 @@
+{
+  "md": {
+    "name": "Maryland",
+    "phone": "+14435553827",
+    "enabled": true,
+    "serviceAreas": ["Baltimore", "Annapolis", "Columbia", "Rockville"]
+  },
+  "nj": {
+    "name": "New Jersey",
+    "phone": "",
+    "enabled": false,
+    "serviceAreas": []
+  }
+}

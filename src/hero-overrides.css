@@ -1,0 +1,36 @@
+/* Keep the desktop hero balanced and make the phone layout feel intentionally designed. */
+.hero{grid-template-columns:1.02fr .85fr 1.3fr;gap:30px;min-height:510px}
+.hero-content{display:contents}
+.hero-copy{padding:48px 0}
+.hero-form{width:auto;margin:0}
+.hero-image{height:auto;aspect-ratio:1.12 / 1;max-height:440px}
+.hero-image img{object-position:center}
+.story-photo img{transform:scale(1.12);object-position:center 42%}
+
+@media(max-width:940px){
+  .hero{grid-template-columns:1fr 1fr;gap:26px}
+  .hero-copy{padding:38px 0}
+  .hero-form{grid-column:1/-1;max-width:570px;margin-top:-45px}
+  .hero-image{height:420px;aspect-ratio:auto;max-height:none}
+}
+
+@media(max-width:650px){
+  header{padding:0 18px}
+  nav,.phone-link{display:none}
+  .hero{display:flex;flex-direction:column;gap:0;min-height:0}
+  .hero-content{display:contents}
+  .hero-copy{padding:45px 20px 32px}
+  .hero-copy h1{font-size:clamp(38px,10vw,43px);line-height:1}
+  .hero-copy .lede{font-size:16px;line-height:1.55}
+  .hero-actions{margin-top:22px;gap:18px;flex-wrap:wrap}
+  .hero-form{order:3;margin:-24px 20px 0;width:calc(100% - 40px);padding:22px}
+  .hero-image{order:2;width:100%;height:330px;aspect-ratio:auto}
+  .hero-image figcaption{bottom:50px;left:20px}
+  .booking.compact{grid-template-columns:1fr}
+  .booking.compact input[type=date]{display:none}
+  .trust-rail{grid-template-columns:1fr 1fr;padding:19px 20px;gap:18px}
+  .trust-rail article{padding:0;border:0}
+  .trust-rail article:nth-child(2){border:0}
+  .trust-rail span{display:none}
+  .trust-rail strong{font-size:11px}
+}

@@ -1,0 +1,2 @@
+export async function api(path,options={}){const response=await fetch(path,{headers:{'Content-Type':'application/json',...(options.headers||{})},...options});const data=await response.json();if(!response.ok)throw new Error(data.error||'Something went wrong.');return data}
+export const stateCode=location.pathname.split('/')[1]?.match(/^[a-z]{2}$/i)?location.pathname.split('/')[1].toLowerCase():'md';

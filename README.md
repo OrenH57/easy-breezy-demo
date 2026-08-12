@@ -34,7 +34,7 @@ The public routes are `/`, `/services`, `/booking`, and `/about`. State-ready va
 
 ## Before launch
 
-- Set a real `ADMIN_PASSWORD`, business phone number, and branded sender email.
+- Set a unique, password-manager-generated `ADMIN_PASSWORD` (at least 16 characters). Owner sign-in is disabled if it is missing; never deploy with the example value.
 - Add a verified Resend sender and `RESEND_API_KEY` to enable reminder emails.
 - Host it behind HTTPS. Run the app continuously (or deploy a daily scheduled job) so scheduled reminder checks can be added reliably.
 - Connect a real payment provider. Stripe Checkout is the recommended route for one-time payments; do not build a card-number form into this site.

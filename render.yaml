@@ -5,11 +5,5 @@ services:
     buildCommand: npm ci && npm run build
     startCommand: npm start
     envVars:
-      - key: DATA_DIR
-        value: /var/data
       - key: ADMIN_PASSWORD
         generateValue: true
-    disk:
-      name: easy-breezy-data
-      mountPath: /var/data
-      sizeGB: 1

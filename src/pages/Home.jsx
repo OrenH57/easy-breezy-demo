@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { BadgeCheck, CalendarDays, Clock3, House, Leaf, ShieldCheck } from 'lucide-react';
+import { BadgeCheck, CalendarDays, Clock3, House, Leaf, Phone, ShieldCheck } from 'lucide-react';
 import originalHero from '../assets/pexels-hvac-technician.jpg';
 import residentialImage from '../assets/service/residential-duct-cleaning.png';
 import dryerImage from '../assets/service/dryer-vent-cleaning.png';
@@ -27,9 +27,9 @@ export default function Home() {
     <section className="original-hero">
       <div className="original-hero-copy">
         <p className="original-eyebrow">Maryland air duct cleaning</p>
-        <h1>Clean air starts<br />with a clean system.</h1>
+        <h1>Cleaner air.<br /><span>Made easy.</span></h1>
         <p className="lede">Professional air duct, dryer vent, commercial duct and chimney services—with a simple booking experience from the first click.</p>
-        <div className="hero-actions"><Link className="button original-primary" to="/booking">Get a free estimate</Link><a className="original-call" href="tel:+14435553827">Call (443) 555-3827</a></div>
+        <div className="hero-actions"><Link className="button original-primary" to="/booking">Get a free estimate</Link><a className="original-call" href="tel:+14435553827"><Phone aria-hidden="true" /> (443) 555-3827</a></div>
         <p className="service-area-line">Serving Baltimore, Annapolis, Columbia, Rockville, and nearby communities.</p>
       </div>
       <figure className="original-hero-image"><img src={originalHero} alt="HVAC technician performing equipment maintenance" /></figure>
@@ -40,7 +40,7 @@ export default function Home() {
       <div className="service-card-grid">{services.map(([image, title, text]) => <article className="service-card" key={title}><img src={image} alt={title} /><div><h3>{title}</h3><p>{text}</p><Link className="text-link" to="/booking">Get an estimate →</Link></div></article>)}</div>
     </section>
     <section className="results-section">
-      <div className="section-top"><p className="eyebrow">A clearer system</p><h2>See the difference.</h2><p>Keep this section simple and visual. Replace these presentation images with your own Easy Breezy job photos as you collect them.</p></div>
+      <div className="section-top"><p className="eyebrow">A clearer system</p><h2>See.</h2><p>Keep this section simple and visual. Replace these presentation images with your own Easy Breezy job photos as you collect them.</p></div>
       <div className="before-after"><figure><img src={ductBefore} alt="Example dirty duct before cleaning" /><figcaption>Before <strong>Visible buildup</strong></figcaption></figure><figure><img src={ductAfter} alt="Example clean duct after cleaning" /><figcaption>After <strong>Cleaner interior</strong></figcaption></figure></div>
       <p className="photo-note">Presentation examples only—not represented as real Easy Breezy customer jobs.</p>
     </section>

@@ -36,11 +36,11 @@ export default function Home() {
     </section>
     <section className="trust-rail">{trust.map(([Icon, title, text]) => <article key={title}><Icon /><div><strong>{title}</strong><span>{text}</span></div></article>)}</section>
     <section className="original-services">
-      <div className="section-top"><p className="eyebrow">Services</p><h2>What can we clean?</h2><p>Four clear categories. Choose one to see what it helps with and go straight to an estimate.</p></div>
+      <div className="section-top"><p className="eyebrow">Services</p><h2>What can we clean?</h2></div>
       <div className="service-card-grid">{services.map(([image, title, text]) => <article className="service-card" key={title}><img src={image} alt={title} /><div><h3>{title}</h3><p>{text}</p><Link className="text-link" to="/booking">Get an estimate →</Link></div></article>)}</div>
     </section>
     <section className="results-section">
-      <div className="section-top"><p className="eyebrow">A clearer system</p><h2>See.</h2><p>Keep this section simple and visual. Replace these presentation images with your own Easy Breezy job photos as you collect them.</p></div>
+      <div className="section-top"><p className="eyebrow">A clearer system</p><h2>See</h2><p>Keep this section simple and visual. Replace these presentation images with your own Easy Breezy job photos as you collect them.</p></div>
       <div className="before-after"><figure><img src={ductBefore} alt="Example dirty duct before cleaning" /><figcaption>Before <strong>Visible buildup</strong></figcaption></figure><figure><img src={ductAfter} alt="Example clean duct after cleaning" /><figcaption>After <strong>Cleaner interior</strong></figcaption></figure></div>
       <p className="photo-note">Presentation examples only—not represented as real Easy Breezy customer jobs.</p>
     </section>

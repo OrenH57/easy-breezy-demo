@@ -27,7 +27,7 @@ export default function Home() {
     <section className="original-hero">
       <div className="original-hero-copy">
         <p className="original-eyebrow">Maryland air duct cleaning</p>
-        <h1>Clean air starts<br />with a clean system.</h1>
+        <h1>Cleaner air.<br /><span>Made easy.</span></h1>
         <p className="lede">Professional air duct, dryer vent, commercial duct and chimney services—with a simple booking experience from the first click.</p>
         <div className="hero-actions"><Link className="button original-primary" to="/booking">Get a free estimate</Link><a className="original-call" href="tel:+14435553827"><Phone aria-hidden="true" /> (443) 555-3827</a></div>
         <p className="service-area-line">Serving Baltimore, Annapolis, Columbia, Rockville, and nearby communities.</p>

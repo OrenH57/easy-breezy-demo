@@ -65,3 +65,40 @@ body{font-family:'Source Sans 3',Arial,sans-serif;color:#172038}.utility{height:
 @media(max-width:940px){.original-hero{gap:42px;padding:56px 20px}.original-hero-image{height:430px}}
 @media(max-width:650px){header{height:70px;border-bottom:1px solid #e7eaf0}.utility{height:32px;font-size:11px}.header-book{display:none}.mobile-menu-toggle{width:40px;height:40px;border-radius:4px;border-color:#d8dde7}.mobile-nav{top:70px;left:0;right:0;gap:0;padding:12px 18px;border:0;border-radius:0;border-bottom:1px solid #dfe4ec;box-shadow:0 16px 25px rgba(18,28,48,.12)}.mobile-nav a{padding:14px 2px;border-radius:0;border-bottom:1px solid #edf0f4;font-size:16px;font-weight:600}.mobile-nav a.active{background:none;color:#4f46c7}.mobile-nav .mobile-phone{margin:12px 0 0;padding:13px 14px;border:0;border-radius:5px;background:#5b52c9;color:#fff;font-weight:700}.original-hero{padding:48px 20px 54px;gap:34px}.original-eyebrow{font-size:11px;margin-bottom:14px}.original-hero h1{font-size:43px;line-height:1.1}.lede{font-size:17px}.original-hero-image{height:auto;border-radius:8px;box-shadow:none}.original-hero-image>img{height:290px;border-radius:8px}.service-area-line{margin-top:22px}.trust-rail{padding:23px 20px}.trust-rail strong{font-size:12px}.original-services,.results-section{padding:64px 20px}.service-card{border-radius:7px}.quote-section{margin:0;border-radius:0;padding:48px 20px}}
 .original-call::before{content:none}
+.original-call{display:inline-flex;align-items:center;gap:8px}.original-call svg{width:17px;height:17px;stroke-width:2}
+
+/* Mobile layout reset: this sits last so legacy responsive rules cannot keep desktop columns alive. */
+@media (max-width:650px){
+  html,body{max-width:100%;overflow-x:hidden}
+  header{display:flex!important;height:70px!important;padding:0 20px!important;gap:12px}
+  .logo{min-width:0}
+  .header-actions{margin-left:auto;display:flex!important;gap:0!important}
+  .header-actions .phone-link,.header-actions .header-book{display:none!important}
+  .mobile-menu-toggle{display:grid!important;place-items:center;flex:0 0 40px}
+  .original-hero{display:flex!important;flex-direction:column!important;align-items:stretch!important;width:100%!important;max-width:none!important;margin:0!important;padding:40px 20px 42px!important;gap:24px!important}
+  .original-hero-copy{width:100%!important;max-width:none!important}
+  .original-hero-copy{text-align:center!important}
+  .original-hero h1{max-width:11ch!important;margin-left:auto!important;margin-right:auto!important;font-size:clamp(40px,11vw,46px)!important;line-height:1.08!important}
+  .lede{max-width:34ch!important;margin-left:auto!important;margin-right:auto!important;font-size:17px!important;line-height:1.58!important}
+  .hero-actions{display:flex!important;align-items:center!important;flex-direction:column!important;gap:10px!important;margin-top:20px!important}
+  .hero-actions .button{width:100%!important;min-height:50px!important}
+  .original-call{padding:6px 0!important;font-size:15px!important}
+  .service-area-line{max-width:none!important;margin-top:18px!important;text-align:center!important}
+  .original-hero-image{order:2!important;width:100%!important;height:260px!important;margin:0!important;border-radius:10px!important}
+  .original-hero-image>img{width:100%!important;height:100%!important;object-position:center 38%!important;border-radius:10px!important}
+  .trust-rail{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;width:100%!important;padding:22px 20px!important;gap:18px 14px!important}
+  .trust-rail article{display:flex!important;min-width:0!important;padding:0!important;gap:10px!important}
+  .trust-rail article svg{flex:0 0 22px!important;width:22px!important;height:22px!important}
+  .trust-rail article strong{font-size:12px!important;line-height:1.25!important;overflow-wrap:anywhere}
+  .trust-rail article span{display:none!important}
+  .original-services,.results-section{width:100%!important;padding:62px 20px!important}
+  .section-top h2{font-size:38px!important;line-height:1.1!important}
+  .quote-section{width:100%!important}
+}
+
+/* Friendly type, disciplined system: bubbly display letters without playful UI chrome. */
+body{font-family:'Nunito Sans',Arial,sans-serif;letter-spacing:.002em}
+h1,h2,.original-hero h1,.section-top h2,.service-card h3,.booking-shell h2,.quote-section h2{font-family:'Fredoka',Arial,sans-serif;letter-spacing:-.045em;font-weight:600}
+.brand .brand-wordmark strong{font-family:'Fredoka',Arial,sans-serif;font-weight:600;letter-spacing:-.055em}
+.button,nav,.phone-link,.original-call,.trust-rail strong{font-family:'Nunito Sans',Arial,sans-serif}
+.lede{font-weight:500}.button{font-weight:800}.original-eyebrow,.eyebrow{font-family:'Nunito Sans',Arial,sans-serif;font-weight:800;letter-spacing:.1em}

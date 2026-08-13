@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { BadgeCheck, CalendarDays, Clock3, House, Leaf, ShieldCheck } from 'lucide-react';
+import { BadgeCheck, CalendarDays, Clock3, House, Leaf, Phone, ShieldCheck } from 'lucide-react';
 import originalHero from '../assets/pexels-hvac-technician.jpg';
 import residentialImage from '../assets/service/residential-duct-cleaning.png';
 import dryerImage from '../assets/service/dryer-vent-cleaning.png';
@@ -29,7 +29,7 @@ export default function Home() {
         <p className="original-eyebrow">Maryland air duct cleaning</p>
         <h1>Clean air starts<br />with a clean system.</h1>
         <p className="lede">Professional air duct, dryer vent, commercial duct and chimney services—with a simple booking experience from the first click.</p>
-        <div className="hero-actions"><Link className="button original-primary" to="/booking">Get a free estimate</Link><a className="original-call" href="tel:+14435553827">Call (443) 555-3827</a></div>
+        <div className="hero-actions"><Link className="button original-primary" to="/booking">Get a free estimate</Link><a className="original-call" href="tel:+14435553827"><Phone aria-hidden="true" /> (443) 555-3827</a></div>
         <p className="service-area-line">Serving Baltimore, Annapolis, Columbia, Rockville, and nearby communities.</p>
       </div>
       <figure className="original-hero-image"><img src={originalHero} alt="HVAC technician performing equipment maintenance" /></figure>

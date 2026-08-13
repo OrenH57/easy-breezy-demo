@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import technicianImage from '../assets/service-technician.jpg';
 import './services.css';
 
@@ -11,5 +11,8 @@ const items = [
 ];
 
 export default function Services() {
-  return <section className="page"><p className="eyebrow">Our services</p><h1>Clear work.<br /><em>Clear results.</em></h1><div className="services-intro"><div><p className="lede">Choose the service that fits your home or business. We will confirm the right scope before we arrive.</p><p className="services-note">A trained technician assesses the system and completes the work carefully, with respect for your space.</p></div><figure><img src={technicianImage} alt="HVAC technician servicing an air conditioning unit" /><figcaption>Professional care, from the equipment to your home.</figcaption></figure></div><div className="service-list">{items.map(([title, text], index) => <article key={title}><b>0{index + 1}</b><h2>{title}</h2><p>{text}</p><Link to="/booking">Book this service →</Link></article>)}</div></section>;
+  const { state } = useParams();
+  const bookingPath = state ? `/${state}/booking` : '/booking';
+
+  return <section className="page"><p className="eyebrow">Our services</p><h1>Clear work.<br /><em>Clear results.</em></h1><div className="services-intro"><div><p className="lede">Choose the service that fits your home or business. We will confirm the right scope before we arrive.</p><p className="services-note">A trained technician assesses the system and completes the work carefully, with respect for your space.</p></div><figure><img src={technicianImage} alt="HVAC technician servicing an air conditioning unit" /><figcaption>Professional care, from the equipment to your home.</figcaption></figure></div><div className="service-list">{items.map(([title, text], index) => <article key={title}><b>0{index + 1}</b><h2>{title}</h2><p>{text}</p><Link to={`${bookingPath}?service=${encodeURIComponent(title)}`}>Book this service →</Link></article>)}</div></section>;
 }

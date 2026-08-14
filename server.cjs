@@ -11,7 +11,7 @@ const statesFile = path.join(root, 'states.json');
 fs.mkdirSync(dataDir, { recursive: true });
 
 const config = {
-  phone: process.env.BUSINESS_PHONE || '+14435553827',
+  phone: process.env.BUSINESS_PHONE || '',
   adminPassword: process.env.ADMIN_PASSWORD || '',
   fromEmail: process.env.FROM_EMAIL || '',
   resendKey: process.env.RESEND_API_KEY || '',
@@ -67,7 +67,7 @@ const server = http.createServer(async (req, res) => {
     res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
     const url = new URL(req.url, 'http://localhost');
     const stateRoute = url.pathname.match(/^\/([a-z]{2})\/?$/);
-    if (req.method === 'GET' && url.pathname === '/api/site') { const state = serviceState(url.searchParams.get('state')); return state?.enabled ? json(res, 200, { name: state.name, phone: state.phone, serviceAreas: state.serviceAreas }) : json(res, 404, { error: 'This service area is not live yet.' }); }
+    if (req.method === 'GET' && url.pathname === '/api/site') { const state = serviceState(url.searchParams.get('state')); return state?.enabled ? json(res, 200, { name: state.name, phone: config.phone || state.phone, serviceAreas: state.serviceAreas }) : json(res, 404, { error: 'This service area is not live yet.' }); }
     if (req.method === 'GET' && !url.pathname.startsWith('/api/')) {
       if (stateRoute && !serviceState(stateRoute[1])?.enabled) return json(res, 404, { error: 'This service area is not live yet.' });
       const requested = path.resolve(distDir, `.${url.pathname}`);
@@ -79,7 +79,9 @@ const server = http.createServer(async (req, res) => {
       if (!state?.enabled) return json(res, 400, { error: 'This service area is not live yet.' });
       if (!clean(input.name) || !clean(input.phone) || !clean(input.email)) return json(res, 400, { error: 'Name, phone, and email are required.' });
       const client = { id: id(), stateCode: clean(input.stateCode), stateName: state.name, name: clean(input.name), phone: clean(input.phone), email: clean(input.email), service: clean(input.service) || 'Air duct cleaning', preferredDate: clean(input.preferredDate), notes: clean(input.notes), createdAt: new Date().toISOString() };
-      db.clients.push(client); db.reminders.push({ id: id(), clientId: client.id, clientName: client.name, stateName: state.name, service: client.service, dueDate: plusYear(client.preferredDate), sentAt: null }); save(); return json(res, 201, { ok: true });
+      db.clients.push(client);
+      if (input.reminderConsent === true) db.reminders.push({ id: id(), clientId: client.id, clientName: client.name, stateName: state.name, service: client.service, dueDate: plusYear(client.preferredDate), sentAt: null });
+      save(); return json(res, 201, { ok: true });
     }
     if (req.method === 'POST' && url.pathname === '/api/chat') {
       const input = await body(req); const state = serviceState(input.stateCode);

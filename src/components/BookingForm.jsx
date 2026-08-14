@@ -12,7 +12,6 @@ export function BookingForm({ compact = false, selectedService }) {
     try {
       await api('/api/leads', { method: 'POST', body: JSON.stringify({
         ...details,
-        reminderConsent: details.reminderConsent === 'on',
         stateCode,
       }) });
       event.currentTarget.reset();
@@ -20,13 +19,12 @@ export function BookingForm({ compact = false, selectedService }) {
     } catch (error) { setStatus(error.message); }
   }
   return <form className="booking" onSubmit={submit}>
-    <input name="name" placeholder="Full name" required />
-    <input name="phone" placeholder="Phone number" required />
-    <input name="email" type="email" placeholder="Email address" required />
-    <select name="service" defaultValue={services.includes(selectedService) ? selectedService : services[0]}>{services.map((service) => <option key={service}>{service}</option>)}</select>
-    <input name="preferredDate" type="date" />
-    <textarea name="notes" rows="3" placeholder="Tell us anything helpful (optional)" />
-    <label style={{display:'flex',alignItems:'flex-start',gap:8,color:'var(--muted)',fontSize:12,lineHeight:1.4}}><input name="reminderConsent" type="checkbox" required style={{width:'auto',minWidth:14,margin:'2px 0 0',padding:0}} /> Yes, email me a yearly service reminder. I can unsubscribe anytime.</label>
+    <label>Full name<input name="name" autoComplete="name" placeholder="Your full name" required /></label>
+    <label>Phone number<input name="phone" autoComplete="tel" inputMode="tel" placeholder="Best number to reach you" required /></label>
+    <label>Email address<input name="email" type="email" autoComplete="email" placeholder="you@example.com" required /></label>
+    <label>Service<select name="service" defaultValue={services.includes(selectedService) ? selectedService : services[0]}>{services.map((service) => <option key={service}>{service}</option>)}</select></label>
+    <label>Preferred date <span className="field-optional">(optional)</span><input name="preferredDate" type="date" /></label>
+    <label>Anything helpful? <span className="field-optional">(optional)</span><textarea name="notes" rows="3" placeholder="Home type, concern, or timing" /></label>
     <button className="button">Request appointment</button>
     {status && <small className="form-status">{status}</small>}
   </form>;

@@ -1,3 +1,5 @@
-import breezyMascot from '../assets/breezy-original-cloud-cutout.png';
+import logo from '../assets/easy-breezy-logo-transparent.png';
 
-export function Brand(){return <div className="brand"><span className="brand-mark"><img className="brand-mascot" src={breezyMascot} alt="Breezy the cloud mascot" /></span><span className="brand-wordmark" aria-label="Easy Breezy Air Duct Cleaning"><strong>Easy <em>Breezy</em></strong><small>Air duct cleaning</small></span></div>}
+export function Brand() {
+  return <img className="brand" src={logo} alt="Easy Breezy Air Duct Cleaning" />;
+}

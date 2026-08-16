@@ -116,7 +116,7 @@
   .dark-cta p { color: #5d6982 !important; }
   .dark-cta .cta-details { border-color: #d8d1f2; color: #354566; }
   .dark-cta .cta-details svg { color: #6845e7; }
-  footer .brand { filter: brightness(0) invert(1); opacity: .96; }
+  footer .brand { filter: none; opacity: 1; }
 }
 
 @media (min-width: 1021px) {

@@ -115,8 +115,48 @@ footer .brand{filter:drop-shadow(0 2px 4px rgba(0,0,0,.18))}
 .hero-points span{display:inline-flex;align-items:center;gap:6px}.hero-points span svg{width:16px;height:16px;color:#7047e8;fill:#efe9ff;stroke-width:2.3}
 .form-status-error{color:#a12d3d!important;font-weight:800}
 
-/* Canvas-drawn wind streaks flow behind the hero heading on every breakpoint (see WindStreaks.jsx). */
-.hero-breeze{display:block;position:absolute;inset:0;z-index:-1;width:100%;height:100%;pointer-events:none}
+/* Two hand-drawn S-curve wind bands + drifting leaves behind the hero heading (see WindStreaks.jsx). */
+.hero-breeze{display:block;position:absolute;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.wind-svg{display:block;width:100%;height:100%}
+.wind-glow{opacity:.55}
+.wind-core{stroke-dasharray:2 22;animation:wind-flow 2.6s linear infinite}
+.wind-band-a{animation:wind-sway-a 9s ease-in-out infinite}
+.wind-band-b{animation:wind-sway-b 11s ease-in-out infinite}
+@keyframes wind-flow{to{stroke-dashoffset:-48}}
+@keyframes wind-sway-a{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+@keyframes wind-sway-b{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+
+.wind-leaves{position:absolute;inset:0}
+.wind-leaf{position:absolute;width:9px;height:9px;background:#6da85c;border-radius:0 100% 0 100%;opacity:0}
+.wind-leaf-1{animation:wind-leaf-a 9s linear infinite}
+.wind-leaf-2{animation:wind-leaf-b 11s linear infinite 2.6s}
+.wind-leaf-3{animation:wind-leaf-c 10s linear infinite 5.2s}
+.wind-leaf-4{animation:wind-leaf-a 12s linear infinite 7.8s}
+@keyframes wind-leaf-a{
+  0%{left:-6%;top:64%;transform:rotate(10deg);opacity:0}
+  8%{opacity:.85}
+  30%{left:24%;top:74%;transform:rotate(150deg)}
+  55%{left:52%;top:58%;transform:rotate(260deg)}
+  80%{left:80%;top:76%;transform:rotate(380deg);opacity:.85}
+  100%{left:106%;top:66%;transform:rotate(470deg);opacity:0}
+}
+@keyframes wind-leaf-b{
+  0%{left:-6%;top:32%;transform:rotate(-20deg);opacity:0}
+  8%{opacity:.8}
+  30%{left:26%;top:22%;transform:rotate(120deg)}
+  55%{left:54%;top:40%;transform:rotate(230deg)}
+  80%{left:82%;top:20%;transform:rotate(340deg);opacity:.8}
+  100%{left:106%;top:34%;transform:rotate(440deg);opacity:0}
+}
+@keyframes wind-leaf-c{
+  0%{left:-6%;top:48%;transform:rotate(5deg);opacity:0}
+  8%{opacity:.9}
+  30%{left:22%;top:38%;transform:rotate(160deg)}
+  55%{left:50%;top:56%;transform:rotate(280deg)}
+  80%{left:78%;top:36%;transform:rotate(390deg);opacity:.9}
+  100%{left:106%;top:50%;transform:rotate(480deg);opacity:0}
+}
+@media(prefers-reduced-motion:reduce){.wind-band,.wind-core,.wind-leaf{animation:none!important;opacity:.5}}
 
 /* The booking area uses the same rounded-card language as the rest of the site. */
 .quote-section{

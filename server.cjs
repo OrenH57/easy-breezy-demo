@@ -2,6 +2,7 @@ const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
+const net = require('node:net');
 
 const root = __dirname;
 const distDir = path.join(root, 'dist');
@@ -21,6 +22,7 @@ let db = fs.existsSync(dbFile) ? JSON.parse(fs.readFileSync(dbFile, 'utf8')) : e
 const sessions = new Map();
 const loginAttempts = new Map();
 const requestLimits = new Map();
+const locationCache = new Map();
 const isProduction = process.env.NODE_ENV === 'production';
 const trustProxy = process.env.TRUST_PROXY === 'true';
 const secureCookies = isProduction || trustProxy;
@@ -29,6 +31,7 @@ const loginWindow = 15 * 60 * 1000;
 const maxLoginAttempts = 5;
 const publicWriteWindow = 15 * 60 * 1000;
 const maxPublicWrites = 10;
+const locationCacheLifetime = 6 * 60 * 60 * 1000;
 const save = () => fs.writeFileSync(dbFile, JSON.stringify(db, null, 2));
 const states = () => JSON.parse(fs.readFileSync(statesFile, 'utf8'));
 const serviceState = (code) => states()[String(code || 'md').toLowerCase()];
@@ -45,6 +48,42 @@ const clientAddress = (req) => {
   // forged value supplied earlier in X-Forwarded-For cannot pick the limiter key.
   if (trustProxy) return String(req.headers['x-forwarded-for'] || '').split(',').at(-1).trim() || req.socket.remoteAddress || 'unknown';
   return req.socket.remoteAddress || 'unknown';
+};
+const isPublicAddress = (value) => {
+  const address = String(value || '').trim().replace(/^::ffff:/i, '');
+  const type = net.isIP(address);
+  if (!type) return false;
+  if (type === 4) {
+    const parts = address.split('.').map(Number);
+    return parts[0] !== 0 && parts[0] !== 10 && parts[0] !== 127 && !(parts[0] === 169 && parts[1] === 254) && !(parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) && !(parts[0] === 192 && parts[1] === 168);
+  }
+  const normalized = address.toLowerCase();
+  return normalized !== '::1' && normalized !== '::' && !normalized.startsWith('fc') && !normalized.startsWith('fd') && !normalized.startsWith('fe80:');
+};
+const viewerAddress = (req) => {
+  if (!trustProxy) return req.socket.remoteAddress || '';
+  // This endpoint is informational only. Prefer Cloudflare's visitor header,
+  // then the first forwarded address, which is the original visitor.
+  const cloudflareAddress = String(req.headers['cf-connecting-ip'] || '').trim();
+  if (isPublicAddress(cloudflareAddress)) return cloudflareAddress;
+  return String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
+};
+const locationFromProvider = async (address) => {
+  const cached = locationCache.get(address);
+  if (cached && cached.expiresAt > Date.now()) return cached.location;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 3_500);
+  try {
+    const response = await fetch(`https://ipwho.is/${encodeURIComponent(address)}`, { signal: controller.signal });
+    if (!response.ok) throw Error('Location provider unavailable');
+    const data = await response.json();
+    if (data.success === false || !data.city || !data.country_code) return null;
+    const location = { city: data.city, region: data.region || '', regionCode: data.region_code || '', countryCode: data.country_code, latitude: Number(data.latitude), longitude: Number(data.longitude) };
+    locationCache.set(address, { location, expiresAt: Date.now() + locationCacheLifetime });
+    return location;
+  } finally {
+    clearTimeout(timeout);
+  }
 };
 function authed(req) { const token = cookies(req).eb_session; const expiresAt = sessions.get(token); if (!expiresAt || expiresAt <= Date.now()) { sessions.delete(token); return false; } return true; }
 function sessionCookie(token, maxAge = Math.floor(sessionLifetime / 1000)) { return `eb_session=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${maxAge}; Priority=High${secureCookies ? '; Secure' : ''}`; }
@@ -87,6 +126,11 @@ const server = http.createServer(async (req, res) => {
     const url = new URL(req.url, 'http://localhost');
     const stateRoute = url.pathname.match(/^\/([a-z]{2})\/?$/);
     if (req.method === 'GET' && url.pathname === '/api/site') { const state = serviceState(url.searchParams.get('state')); return state?.enabled ? json(res, 200, { name: state.name, phone: config.phone || state.phone, serviceAreas: state.serviceAreas }) : json(res, 404, { error: 'This service area is not live yet.' }); }
+    if (req.method === 'GET' && url.pathname === '/api/location') {
+      const address = viewerAddress(req);
+      if (!isPublicAddress(address)) return json(res, 200, { location: null });
+      return json(res, 200, { location: await locationFromProvider(address) });
+    }
     if (req.method === 'GET' && !url.pathname.startsWith('/api/')) {
       if (stateRoute && !serviceState(stateRoute[1])?.enabled) return json(res, 404, { error: 'This service area is not live yet.' });
       const requested = path.resolve(distDir, `.${url.pathname}`);

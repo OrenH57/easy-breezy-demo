@@ -6,39 +6,18 @@ const normalizeLocation = ({ city, region, regionCode, countryCode, latitude, lo
   ? { city, region, regionCode, countryCode, latitude: Number(latitude), longitude: Number(longitude) }
   : null;
 
-async function getLocationFromProviders(signal) {
-  const providers = [
-    async () => {
-      const response = await fetch('https://ipapi.co/json/', { signal });
-      if (!response.ok) throw new Error('Primary location provider unavailable');
-      const data = await response.json();
-      return normalizeLocation({ city: data.city, region: data.region, regionCode: data.region_code, countryCode: data.country_code, latitude: data.latitude, longitude: data.longitude });
-    },
-    async () => {
-      const response = await fetch('https://ipwho.is/', { signal });
-      if (!response.ok) throw new Error('Backup location provider unavailable');
-      const data = await response.json();
-      return normalizeLocation({ city: data.city, region: data.region, regionCode: data.region_code, countryCode: data.country_code, latitude: data.latitude, longitude: data.longitude });
-    },
-  ];
-
-  for (const getLocation of providers) {
-    try {
-      const location = await getLocation();
-      if (location) return location;
-    } catch {
-      // Try the next provider before falling back to the default service-area copy.
-    }
-  }
-
-  return null;
+async function getLocationFromServer(signal) {
+  const response = await fetch('/api/location', { signal, cache: 'no-store' });
+  if (!response.ok) throw new Error('Location service unavailable');
+  const { location } = await response.json();
+  return normalizeLocation(location || {});
 }
 
 function loadViewerLocation() {
   if (!viewerLocationRequest) {
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), 4500);
-    viewerLocationRequest = getLocationFromProviders(controller.signal)
+    viewerLocationRequest = getLocationFromServer(controller.signal)
       .finally(() => {
         window.clearTimeout(timeout);
         viewerLocationRequest = undefined;

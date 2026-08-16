@@ -158,6 +158,20 @@ footer .brand{filter:drop-shadow(0 2px 4px rgba(0,0,0,.18))}
   .quote-form{margin:0!important;padding:22px 18px!important;border-radius:14px!important}
 }
 
+/* Mobile follows the same public-facing palette as desktop: lavender chrome, white content, purple actions. */
+@media(max-width:650px){
+  body,#root{background:#fff!important;color:#15244a!important}
+  header,footer{background:#f5f2ff!important;border-color:#dfd8f5!important}
+  .mobile-nav{background:#f5f2ff!important;border-color:#dfd8f5!important}
+  .mobile-nav a.active{background:#e5ddff!important;color:#6037d7!important}
+  .original-hero,.original-services{background:#fff!important}
+  .results-section{background:#faf9fd!important}
+  .dark-cta{background:#f7f5ff!important;color:#15244a!important;border-color:#dfd8fa!important}
+  .dark-cta h2{color:#15244a!important}
+  .dark-cta p{color:#5d6982!important}
+  .dark-cta .cta-details{color:#354566!important}
+}
+
 /* Exact type pairing from the supplied reference image. */
 body,button,input,select,textarea,.booking input,.booking select,.booking textarea,.booking label,.text-link,footer>div:last-child{font-family:'Easy Breezy Nunito',Arial,sans-serif}
 h1,h2,h3,.original-hero h1,.section-top h2,.service-card h3,.booking-shell h2,.quote-section h2{font-family:'Easy Breezy Fredoka',Arial,sans-serif;font-weight:600;letter-spacing:-.045em}

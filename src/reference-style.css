@@ -115,6 +115,11 @@ footer .brand{filter:drop-shadow(0 2px 4px rgba(0,0,0,.18))}
 .hero-points span{display:inline-flex;align-items:center;gap:6px}.hero-points span svg{width:16px;height:16px;color:#7047e8;fill:#efe9ff;stroke-width:2.3}
 .form-status-error{color:#a12d3d!important;font-weight:800}
 
+/* A quiet, CSS-only fresh-air current gives the mobile hero some life. */
+.hero-breeze{display:none}
+@media(max-width:650px){.hero-breeze{position:absolute;top:12px;left:50%;width:180px;height:22px;display:flex;justify-content:center;gap:7px;margin:0;overflow:hidden;transform:translateX(-50%)}.hero-breeze i{display:block;width:48px;height:14px;border-top:2px solid rgba(111,75,232,.26);border-radius:50%;transform:skewX(-24deg);animation:hero-breeze 3.4s ease-in-out infinite}.hero-breeze i:nth-child(2){width:62px;opacity:.72;animation-delay:.28s}.hero-breeze i:nth-child(3){width:38px;opacity:.48;animation-delay:.56s}@keyframes hero-breeze{0%,100%{transform:translateX(-7px) skewX(-24deg);opacity:.32}50%{transform:translateX(7px) skewX(-24deg);opacity:.9}}}
+@media(prefers-reduced-motion:reduce){.hero-breeze i{animation:none!important}}
+
 /* The booking area uses the same rounded-card language as the rest of the site. */
 .quote-section{
   gap:24px!important;

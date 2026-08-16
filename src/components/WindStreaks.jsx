@@ -1,20 +1,45 @@
 import { useEffect, useRef } from 'react';
 
-const BASE_RGB = '111,75,232';
-const HIGHLIGHT_RGB = '163,138,245';
+const GLOW_RGB = '124,109,240'; // soft violet-blue glow, on-brand
+const CORE_RGB = '255,255,255'; // bright highlight down the ribbon's spine
+const LEAF_RGB = '109,168,92';
 const FRAME_INTERVAL = 1000 / 30; // decorative background: 30fps is plenty and cheaper
+const SAMPLE_STEP = 22;
 
 function rand(min, max) { return min + Math.random() * (max - min); }
 function lerp(a, b, t) { return a + (b - a) * t; }
 
-// A cheap, smooth pseudo-noise flow field: mostly rightward ("wind"),
-// with layered sine turbulence for organic curl/swirl instead of straight lines.
-function flowAngle(x, y, t) {
-  return (
-    Math.sin(x * 0.006 + t * 0.5) * 0.7 +
-    Math.cos(y * 0.01 - t * 0.35) * 0.5 +
-    Math.sin((x - y) * 0.004 + t * 0.22) * 0.4
-  );
+function makeRibbon(width, height, index, total) {
+  const band = total > 1 ? index / (total - 1) : 0.4;
+  return {
+    baseY: height * lerp(0.24, 0.6, band) + rand(-14, 14),
+    waveAmp: rand(26, 46),
+    waveFreq: rand(0.006, 0.011),
+    wavePhaseSpeed: rand(0.45, 0.75),
+    phase: rand(0, Math.PI * 2),
+    gustSpeed: rand(55, 95),
+    gustOffsetA: rand(0, width),
+    gustOffsetB: rand(0, width),
+    gustSpread: rand(170, 260),
+    pulseSpeed: rand(0.5, 0.85),
+    pulsePhase: rand(0, Math.PI * 2),
+    glowWidth: rand(16, 24),
+    coreWidth: rand(2.5, 4),
+  };
+}
+
+function makeLeaf(width, height) {
+  return {
+    x: rand(0, width),
+    y: rand(height * 0.1, height * 0.85),
+    size: rand(9, 16),
+    speed: rand(26, 58),
+    rot: rand(0, Math.PI * 2),
+    spin: rand(-1.4, 1.4),
+    bobPhase: rand(0, Math.PI * 2),
+    bobAmp: rand(6, 16),
+    opacity: rand(0.55, 0.9),
+  };
 }
 
 export function WindStreaks() {
@@ -27,8 +52,8 @@ export function WindStreaks() {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
 
     const ctx = canvas.getContext('2d');
-    let particles = [];
-    let motes = [];
+    let ribbons = [];
+    let leaves = [];
     let width = 0;
     let height = 0;
     let dpr = 1;
@@ -39,34 +64,9 @@ export function WindStreaks() {
     let clock = 0;
     const pointer = { x: -9999, y: -9999, active: false, fade: 0 };
 
-    function makeParticle() {
-      const depth = Math.random();
-      return {
-        x: rand(0, width),
-        y: rand(0, height),
-        depth,
-        speed: lerp(40, 130, depth),
-        size: lerp(0.8, 2.2, depth),
-        opacity: lerp(0.1, 0.4, depth),
-        tail: lerp(26, 70, depth),
-      };
-    }
-
-    function makeMote() {
-      return {
-        x: rand(0, width),
-        y: rand(0, height),
-        r: rand(14, 40),
-        speed: rand(6, 16),
-        opacity: rand(0.025, 0.07),
-        phase: rand(0, Math.PI * 2),
-      };
-    }
-
     function seed() {
-      const count = Math.max(36, Math.round((width * height) / 4200));
-      particles = Array.from({ length: count }, makeParticle);
-      motes = Array.from({ length: Math.max(3, Math.round(count / 24)) }, makeMote);
+      ribbons = [makeRibbon(width, height, 0, 2), makeRibbon(width, height, 1, 2)];
+      leaves = Array.from({ length: 7 }, () => makeLeaf(width, height));
     }
 
     function resize() {
@@ -106,6 +106,83 @@ export function WindStreaks() {
     }
     function onTouchEnd() { pointer.active = false; }
 
+    function ribbonY(r, x, t) {
+      const wave = Math.sin(x * r.waveFreq + t * r.wavePhaseSpeed + r.phase) * r.waveAmp
+        + Math.sin(x * r.waveFreq * 2.1 - t * r.wavePhaseSpeed * 0.55) * r.waveAmp * 0.3;
+      let y = r.baseY + wave;
+      if (pointer.fade > 0) {
+        const dx = x - pointer.x;
+        const dy = y - pointer.y;
+        const dist = Math.hypot(dx, dy) || 1;
+        const radius = 170;
+        if (dist < radius) {
+          const push = (1 - dist / radius) * pointer.fade * 46;
+          y += (dy < 0 ? -push : push);
+        }
+      }
+      return y;
+    }
+
+    function drawRibbon(r, t) {
+      const span = width + r.gustSpread * 4;
+      const centerA = ((t * r.gustSpeed + r.gustOffsetA) % span) - r.gustSpread * 2;
+      const centerB = ((t * r.gustSpeed + r.gustOffsetB) % span) - r.gustSpread * 2;
+      const pulse = 0.7 + 0.3 * Math.sin(t * r.pulseSpeed + r.pulsePhase);
+      const steps = Math.ceil(width / SAMPLE_STEP) + 1;
+      const pts = new Array(steps);
+      const env = new Array(steps);
+      for (let i = 0; i < steps; i++) {
+        const x = i * SAMPLE_STEP;
+        pts[i] = { x, y: ribbonY(r, x, t) };
+        const envA = Math.exp(-((x - centerA) ** 2) / (2 * r.gustSpread ** 2));
+        const envB = Math.exp(-((x - centerB) ** 2) / (2 * r.gustSpread ** 2));
+        env[i] = Math.min(1, envA + envB) * pulse;
+      }
+
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      for (let i = 0; i < steps - 1; i++) {
+        const a = ((env[i] + env[i + 1]) / 2) * 0.34 + 0.06;
+        ctx.strokeStyle = `rgba(${GLOW_RGB},${a})`;
+        ctx.lineWidth = r.glowWidth;
+        ctx.beginPath();
+        ctx.moveTo(pts[i].x, pts[i].y);
+        ctx.lineTo(pts[i + 1].x, pts[i + 1].y);
+        ctx.stroke();
+      }
+      for (let i = 0; i < steps - 1; i++) {
+        const a = ((env[i] + env[i + 1]) / 2) * 0.75 + 0.1;
+        ctx.strokeStyle = `rgba(${CORE_RGB},${a})`;
+        ctx.lineWidth = r.coreWidth;
+        ctx.beginPath();
+        ctx.moveTo(pts[i].x, pts[i].y);
+        ctx.lineTo(pts[i + 1].x, pts[i + 1].y);
+        ctx.stroke();
+      }
+    }
+
+    function drawLeaf(l) {
+      const y = l.y + Math.sin(clock * 1.4 + l.bobPhase) * l.bobAmp * 0.3;
+      ctx.save();
+      ctx.translate(l.x, y);
+      ctx.rotate(l.rot);
+      ctx.globalAlpha = l.opacity;
+      const s = l.size;
+      ctx.fillStyle = `rgb(${LEAF_RGB})`;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.quadraticCurveTo(s * 0.5, -s * 0.5, s, 0);
+      ctx.quadraticCurveTo(s * 0.5, s * 0.5, 0, 0);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+      ctx.lineWidth = 0.6;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(s, 0);
+      ctx.stroke();
+      ctx.restore();
+    }
+
     function frame(now) {
       raf = requestAnimationFrame(frame);
       if (now - last < FRAME_INTERVAL) return;
@@ -116,59 +193,18 @@ export function WindStreaks() {
 
       ctx.clearRect(0, 0, width, height);
 
-      for (const m of motes) {
-        m.phase += dt * 0.35;
-        const mx = ((m.x + clock * m.speed) % (width + 80)) - 40;
-        const my = m.y + Math.sin(m.phase) * 12;
-        const grad = ctx.createRadialGradient(mx, my, 0, mx, my, m.r);
-        grad.addColorStop(0, `rgba(${HIGHLIGHT_RGB},${m.opacity})`);
-        grad.addColorStop(1, `rgba(${HIGHLIGHT_RGB},0)`);
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(mx, my, m.r, 0, Math.PI * 2);
-        ctx.fill();
-      }
+      for (const r of ribbons) drawRibbon(r, clock);
 
-      for (const p of particles) {
-        let angle = flowAngle(p.x, p.y, clock);
-        if (pointer.fade > 0) {
-          const dx = p.x - pointer.x;
-          const dy = p.y - pointer.y;
-          const dist = Math.hypot(dx, dy) || 1;
-          const radius = 150;
-          if (dist < radius) {
-            const swirl = Math.atan2(dy, dx) + Math.PI / 2;
-            const strength = Math.min(1, ((1 - dist / radius) * pointer.fade) * 2.6);
-            angle = lerp(angle, swirl, strength);
-          }
+      for (const l of leaves) {
+        l.x += l.speed * dt;
+        l.rot += l.spin * dt;
+        if (l.x > width + 20) {
+          Object.assign(l, makeLeaf(width, height));
+          l.x = -20;
         }
-        const dirX = Math.cos(angle);
-        const dirY = Math.sin(angle) * 0.55;
-        const mag = Math.hypot(dirX, dirY) || 1;
-        const ux = dirX / mag;
-        const uy = dirY / mag;
-        const tailX = p.x - ux * p.tail;
-        const tailY = p.y - uy * p.tail;
-
-        const rgb = p.depth > 0.72 ? HIGHLIGHT_RGB : BASE_RGB;
-        const grad = ctx.createLinearGradient(tailX, tailY, p.x, p.y);
-        grad.addColorStop(0, `rgba(${rgb},0)`);
-        grad.addColorStop(1, `rgba(${rgb},${p.opacity})`);
-        ctx.strokeStyle = grad;
-        ctx.lineWidth = p.size;
-        ctx.lineCap = 'round';
-        ctx.beginPath();
-        ctx.moveTo(tailX, tailY);
-        ctx.lineTo(p.x, p.y);
-        ctx.stroke();
-
-        p.x += dirX * p.speed * dt;
-        p.y += dirY * p.speed * dt;
-        if (p.x < -15 || p.x > width + 15 || p.y < -15 || p.y > height + 15) {
-          Object.assign(p, makeParticle());
-          p.x = -10;
-        }
+        drawLeaf(l);
       }
+      ctx.globalAlpha = 1;
     }
 
     function start() {

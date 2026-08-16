@@ -27,7 +27,6 @@ export function WindStreaks() {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
 
     const ctx = canvas.getContext('2d');
-    const mobileQuery = window.matchMedia('(max-width: 650px)');
     let particles = [];
     let motes = [];
     let width = 0;
@@ -194,12 +193,11 @@ export function WindStreaks() {
     }
 
     function syncToViewport() {
-      if (mobileQuery.matches && !document.hidden && inView) start();
+      if (!document.hidden && inView) start();
       else stop();
     }
 
     syncToViewport();
-    mobileQuery.addEventListener('change', syncToViewport);
     document.addEventListener('visibilitychange', syncToViewport);
 
     const io = new IntersectionObserver(([entry]) => {
@@ -213,7 +211,6 @@ export function WindStreaks() {
 
     return () => {
       stop();
-      mobileQuery.removeEventListener('change', syncToViewport);
       document.removeEventListener('visibilitychange', syncToViewport);
       io.disconnect();
       ro.disconnect();

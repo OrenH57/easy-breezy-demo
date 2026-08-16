@@ -115,11 +115,8 @@ footer .brand{filter:drop-shadow(0 2px 4px rgba(0,0,0,.18))}
 .hero-points span{display:inline-flex;align-items:center;gap:6px}.hero-points span svg{width:16px;height:16px;color:#7047e8;fill:#efe9ff;stroke-width:2.3}
 .form-status-error{color:#a12d3d!important;font-weight:800}
 
-/* Canvas-drawn wind streaks flow behind the mobile hero heading (see WindStreaks.jsx). */
-.hero-breeze{display:none}
-@media(max-width:650px){
-  .hero-breeze{display:block;position:absolute;inset:0;z-index:-1;width:100%;height:100%;pointer-events:none}
-}
+/* Canvas-drawn wind streaks flow behind the hero heading on every breakpoint (see WindStreaks.jsx). */
+.hero-breeze{display:block;position:absolute;inset:0;z-index:-1;width:100%;height:100%;pointer-events:none}
 
 /* The booking area uses the same rounded-card language as the rest of the site. */
 .quote-section{

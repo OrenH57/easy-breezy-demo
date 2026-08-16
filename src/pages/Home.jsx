@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { BadgeCheck, CalendarDays, CircleDollarSign, Heart, MapPin, Sparkles, Wind } from 'lucide-react';
+import { BadgeCheck, CalendarDays, CircleDollarSign, Heart, MapPin, Sparkles } from 'lucide-react';
+import { WindStreaks } from '../components/WindStreaks';
 import familyHero from '../assets/easy-breezy-family-hero-final.webp';
 import residentialImage from '../assets/service/easy-breezy-duct-technician.webp';
 import dryerImage from '../assets/service/easy-breezy-dryer-technician.webp';
@@ -19,7 +20,7 @@ const cleanGallery = [[cleanDuctInterior, 'Inside the system', 'A cleaner system
 
 export default function Home() { return <>
   <section className="original-hero upgraded-hero">
-    <div className="original-hero-copy"><div className="hero-breeze" aria-hidden="true">{[1, 2, 3, 4].map(n => <Wind key={n} className={`wind-icon wind-icon-${n}`} aria-hidden="true" />)}</div><h1>A fresher home<br />starts with <span>clean air ducts.</span></h1><p className="lede">Professional air duct, dryer vent, and chimney service for homes that deserve clean, comfortable air.</p><div className="hero-points"><span><Sparkles aria-hidden="true" />Clear next steps.</span><span><Heart aria-hidden="true" />Respectful service.</span><span><MapPin aria-hidden="true" />Local coordination.</span></div><div className="hero-actions"><Link className="button original-primary" to="/booking">Get Free Quote <span>→</span></Link><Link className="hero-secondary" to="/services">Explore services</Link></div></div>
+    <div className="original-hero-copy"><WindStreaks /><h1>A fresher home<br />starts with <span>clean air ducts.</span></h1><p className="lede">Professional air duct, dryer vent, and chimney service for homes that deserve clean, comfortable air.</p><div className="hero-points"><span><Sparkles aria-hidden="true" />Clear next steps.</span><span><Heart aria-hidden="true" />Respectful service.</span><span><MapPin aria-hidden="true" />Local coordination.</span></div><div className="hero-actions"><Link className="button original-primary" to="/booking">Get Free Quote <span>→</span></Link><Link className="hero-secondary" to="/services">Explore services</Link></div></div>
     <figure className="original-hero-image"><img src={familyHero} fetchPriority="high" alt="Family relaxing in a clean, bright living room" /><HeroLocation /></figure>
     <div className="hero-availability"><AvailabilityCard /></div>
   </section>

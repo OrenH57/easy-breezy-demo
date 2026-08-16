@@ -7,9 +7,10 @@ import About from './pages/About';
 import Admin from './pages/Admin';
 import SeoPage from './pages/SeoPage';
 import Results from './pages/Results';
+import Redesign from './pages/Redesign';
 
 const Public = ({ children }) => <Layout>{children}</Layout>;
 export default function App() { return <Routes>
   <Route path="/" element={<Public><Home /></Public>} /><Route path="/services" element={<Public><Services /></Public>} /><Route path="/booking" element={<Public><Booking /></Public>} /><Route path="/about" element={<Public><About /></Public>} /><Route path="/before-after" element={<Public><Results /></Public>} /><Route path="/admin" element={<Admin />} />
-  <Route path="/service-areas/:location" element={<Public><SeoPage location /></Public>} /><Route path="/:page" element={<Public><SeoPage /></Public>} /><Route path="*" element={<Navigate to="/" replace />} />
+  <Route path="/redesign" element={<Redesign />} /><Route path="/service-areas/:location" element={<Public><SeoPage location /></Public>} /><Route path="/:page" element={<Public><SeoPage /></Public>} /><Route path="*" element={<Navigate to="/" replace />} />
 </Routes>; }

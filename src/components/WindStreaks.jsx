@@ -9,8 +9,10 @@ import windGust2 from '../assets/wind-gust-2.png';
 function Gust({ src, className }) {
   return (
     <span className={`wind-gust-wrap ${className}`}>
-      <img src={src} className="wind-gust-img" alt="" />
-      <span className="wind-gust-tint" style={{ '--gust-mask': `url(${src})` }} />
+      <span className="wind-gust-squash">
+        <img src={src} className="wind-gust-img" alt="" />
+        <span className="wind-gust-tint" style={{ '--gust-mask': `url(${src})` }} />
+      </span>
     </span>
   );
 }

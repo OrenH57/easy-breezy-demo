@@ -119,6 +119,7 @@ footer .brand{filter:drop-shadow(0 2px 4px rgba(0,0,0,.18))}
 .hero-breeze{display:block;position:absolute;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
 
 .wind-gust-wrap{position:absolute;display:block;isolation:isolate}
+.wind-gust-squash{display:block;transform:scaleY(.6)}
 .wind-gust-img{display:block;width:100%;height:auto;opacity:.9}
 .wind-gust-tint{position:absolute;inset:0;background:#7c6df0;mix-blend-mode:multiply;opacity:.6;-webkit-mask-image:var(--gust-mask);-webkit-mask-size:100% 100%;-webkit-mask-repeat:no-repeat;mask-image:var(--gust-mask);mask-size:100% 100%;mask-repeat:no-repeat}
 .wind-gust-1{width:70%;max-width:340px;left:-42%;top:12%;animation:wind-gust-sweep-a 2.4s linear infinite}

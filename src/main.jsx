@@ -7,7 +7,5 @@ import './motion.css';
 import './hero-overrides.css';
 import './reference-style.css';
 import './desktop-home.css';
-import './redesign.css';
-import './redesign-three.css';
 
 createRoot(document.getElementById('root')).render(<React.StrictMode><BrowserRouter><App /></BrowserRouter></React.StrictMode>);

@@ -23,6 +23,7 @@ const loginAttempts = new Map();
 const requestLimits = new Map();
 const isProduction = process.env.NODE_ENV === 'production';
 const trustProxy = process.env.TRUST_PROXY === 'true';
+const secureCookies = isProduction || trustProxy;
 const sessionLifetime = 8 * 60 * 60 * 1000;
 const loginWindow = 15 * 60 * 1000;
 const maxLoginAttempts = 5;
@@ -40,11 +41,13 @@ const clientAddress = (req) => {
   // Only trust proxy-provided addresses when the app is deployed behind a proxy
   // configured by us. Trusting this header on a directly exposed server lets an
   // attacker pick a new IP address for every request.
-  if (trustProxy) return String(req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.socket.remoteAddress || 'unknown';
+  // Proxies append the immediate client address. Use the rightmost entry so a
+  // forged value supplied earlier in X-Forwarded-For cannot pick the limiter key.
+  if (trustProxy) return String(req.headers['x-forwarded-for'] || '').split(',').at(-1).trim() || req.socket.remoteAddress || 'unknown';
   return req.socket.remoteAddress || 'unknown';
 };
 function authed(req) { const token = cookies(req).eb_session; const expiresAt = sessions.get(token); if (!expiresAt || expiresAt <= Date.now()) { sessions.delete(token); return false; } return true; }
-function sessionCookie(token, maxAge = Math.floor(sessionLifetime / 1000)) { return `eb_session=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${maxAge}; Priority=High${isProduction ? '; Secure' : ''}`; }
+function sessionCookie(token, maxAge = Math.floor(sessionLifetime / 1000)) { return `eb_session=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${maxAge}; Priority=High${secureCookies ? '; Secure' : ''}`; }
 function loginAllowed(req) { const attempt = loginAttempts.get(clientAddress(req)); return !attempt || attempt.until <= Date.now() || attempt.count < maxLoginAttempts; }
 function recordFailedLogin(req) { const address = clientAddress(req); const attempt = loginAttempts.get(address); const active = attempt && attempt.until > Date.now() ? attempt : { count: 0, until: Date.now() + loginWindow }; loginAttempts.set(address, { count: active.count + 1, until: active.until }); }
 function clearFailedLogins(req) { loginAttempts.delete(clientAddress(req)); }
@@ -52,7 +55,7 @@ function requestAllowed(req, scope, limit, window) { const key = `${scope}:${cli
 function validSameOrigin(req) { const origin = req.headers.origin; return !origin || new URL(origin).host === req.headers.host; }
 
 function json(res, status, body) { res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' }); res.end(JSON.stringify(body)); }
-function body(req) { return new Promise((resolve, reject) => { let raw = ''; let done = false; const fail = (message, status = 400) => { if (!done) { done = true; const error = Error(message); error.status = status; reject(error); } }; if (!String(req.headers['content-type'] || '').toLowerCase().startsWith('application/json')) return fail('Invalid request'); req.on('data', (chunk) => { if (done) return; raw += chunk; if (raw.length > 1e6) { req.resume(); fail('Request too large', 413); } }); req.on('end', () => { if (done) return; try { const parsed = raw ? JSON.parse(raw) : {}; done = true; resolve(parsed); } catch { fail('Invalid request'); } }); req.on('error', () => fail('Invalid request')); }); }
+function body(req) { return new Promise((resolve, reject) => { let raw = ''; let size = 0; let done = false; const fail = (message, status = 400) => { if (!done) { done = true; const error = Error(message); error.status = status; reject(error); } }; if (!String(req.headers['content-type'] || '').toLowerCase().startsWith('application/json')) return fail('Invalid request'); if (Number(req.headers['content-length']) > 1e6) return fail('Request too large', 413); req.on('data', (chunk) => { if (done) return; size += chunk.length; if (size > 1e6) { fail('Request too large', 413); req.destroy(); return; } raw += chunk; }); req.on('end', () => { if (done) return; try { const parsed = raw ? JSON.parse(raw) : {}; done = true; resolve(parsed); } catch { fail('Invalid request'); } }); req.on('error', () => fail('Invalid request')); }); }
 const mime = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.webp': 'image/webp', '.woff2': 'font/woff2' };
 function sendFile(res, file, cache = 'public, max-age=3600') { res.writeHead(200, { 'Content-Type': mime[path.extname(file).toLowerCase()] || 'application/octet-stream', 'Cache-Control': cache }); fs.createReadStream(file).pipe(res); }
 function productionPage(res) { const file = path.join(distDir, 'index.html'); if (!fs.existsSync(file)) return json(res, 503, { error: 'Site is building. Please try again in a moment.' }); sendFile(res, file, 'no-store'); }
@@ -110,7 +113,7 @@ const server = http.createServer(async (req, res) => {
       db.messages.push({ id: id(), stateCode: clean(input.stateCode), stateName: state.name, name: clean(input.name), phone: clean(input.phone), message: clean(input.message), createdAt: new Date().toISOString() }); save(); return json(res, 201, { ok: true });
     }
     if (req.method === 'POST' && url.pathname === '/api/admin/login') { if (!config.adminPassword) return json(res, 503, { error: 'Owner access is not configured yet. Set ADMIN_PASSWORD before signing in.' }); if (!loginAllowed(req)) return json(res, 429, { error: 'Too many attempts. Please wait 15 minutes, then try again.' }); const input = await body(req); if (!crypto.timingSafeEqual(passwordHash(clean(input.password)), passwordHash(config.adminPassword))) { recordFailedLogin(req); return json(res, 401, { error: 'We could not sign you in. Check your password and try again.' }); } clearFailedLogins(req); const token = id(); sessions.set(token, Date.now() + sessionLifetime); res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'Set-Cookie': sessionCookie(token), 'X-Content-Type-Options': 'nosniff' }); return res.end('{"ok":true}'); }
-    if (req.method === 'POST' && url.pathname === '/api/admin/logout') { sessions.delete(cookies(req).eb_session); res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'Set-Cookie': sessionCookie('', 0), 'X-Content-Type-Options': 'nosniff' }); return res.end('{"ok":true}'); }
+    if (req.method === 'POST' && url.pathname === '/api/admin/logout') { if (!validSameOrigin(req)) return json(res, 403, { error: 'Invalid request origin.' }); sessions.delete(cookies(req).eb_session); res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'Set-Cookie': sessionCookie('', 0), 'X-Content-Type-Options': 'nosniff' }); return res.end('{"ok":true}'); }
     if (url.pathname.startsWith('/api/admin/')) {
       if (!authed(req)) return json(res, 401, { error: 'Please sign in.' });
       if (req.method !== 'GET' && !validSameOrigin(req)) return json(res, 403, { error: 'Invalid request origin.' });
@@ -122,4 +125,7 @@ const server = http.createServer(async (req, res) => {
   } catch (error) { console.error(error); return json(res, error.status || 500, { error: error.status ? error.message : 'Server error' }); }
 });
 async function runDueReminderSweep() { for (const reminder of db.reminders.filter((item) => !item.sentAt && item.dueDate <= date(Date.now()))) { try { await sendReminder(reminder); } catch (error) { console.error('Reminder not sent:', error.message); } } }
+server.requestTimeout = 15_000;
+server.headersTimeout = 10_000;
+server.keepAliveTimeout = 5_000;
 server.listen(process.env.PORT || 4173, process.env.HOST || '0.0.0.0', () => { console.log(`Easy Breezy running on port ${process.env.PORT || 4173}`); if (!config.adminPassword) console.warn('Owner sign-in is disabled until ADMIN_PASSWORD is set.'); if (config.adminPassword && config.adminPassword.length < 16) console.warn('ADMIN_PASSWORD is shorter than 16 characters; replace it with a password-manager-generated secret.'); runDueReminderSweep(); setInterval(runDueReminderSweep, 24 * 60 * 60 * 1000); setInterval(() => { const now = Date.now(); for (const [token, expiresAt] of sessions) if (expiresAt <= now) sessions.delete(token); for (const [address, attempt] of loginAttempts) if (attempt.until <= now) loginAttempts.delete(address); for (const [key, limit] of requestLimits) if (limit.until <= now) requestLimits.delete(key); }, 60 * 60 * 1000); });

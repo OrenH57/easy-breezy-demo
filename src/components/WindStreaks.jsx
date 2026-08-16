@@ -44,9 +44,10 @@ export function WindStreaks() {
         x: rand(0, width),
         y: rand(0, height),
         depth,
-        speed: lerp(16, 52, depth),
-        size: lerp(0.5, 1.9, depth),
-        opacity: lerp(0.06, 0.34, depth),
+        speed: lerp(40, 130, depth),
+        size: lerp(0.8, 2.2, depth),
+        opacity: lerp(0.1, 0.4, depth),
+        tail: lerp(26, 70, depth),
       };
     }
 
@@ -130,22 +131,28 @@ export function WindStreaks() {
             angle = lerp(angle, swirl, strength);
           }
         }
-        const vx = Math.cos(angle) * p.speed;
-        const vy = Math.sin(angle) * p.speed * 0.55;
-        const nx = p.x + vx * dt;
-        const ny = p.y + vy * dt;
+        const dirX = Math.cos(angle);
+        const dirY = Math.sin(angle) * 0.55;
+        const mag = Math.hypot(dirX, dirY) || 1;
+        const ux = dirX / mag;
+        const uy = dirY / mag;
+        const tailX = p.x - ux * p.tail;
+        const tailY = p.y - uy * p.tail;
 
         const rgb = p.depth > 0.72 ? HIGHLIGHT_RGB : BASE_RGB;
-        ctx.strokeStyle = `rgba(${rgb},${p.opacity})`;
+        const grad = ctx.createLinearGradient(tailX, tailY, p.x, p.y);
+        grad.addColorStop(0, `rgba(${rgb},0)`);
+        grad.addColorStop(1, `rgba(${rgb},${p.opacity})`);
+        ctx.strokeStyle = grad;
         ctx.lineWidth = p.size;
         ctx.lineCap = 'round';
         ctx.beginPath();
-        ctx.moveTo(p.x, p.y);
-        ctx.lineTo(nx, ny);
+        ctx.moveTo(tailX, tailY);
+        ctx.lineTo(p.x, p.y);
         ctx.stroke();
 
-        p.x = nx;
-        p.y = ny;
+        p.x += dirX * p.speed * dt;
+        p.y += dirY * p.speed * dt;
         if (p.x < -15 || p.x > width + 15 || p.y < -15 || p.y > height + 15) {
           Object.assign(p, makeParticle());
           p.x = -10;

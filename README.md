@@ -35,6 +35,8 @@ The public routes are `/`, `/services`, `/booking`, and `/about`. State-ready va
 ## Before launch
 
 - Set a unique, password-manager-generated `ADMIN_PASSWORD` (at least 16 characters). Owner sign-in is disabled if it is missing; never deploy with the example value.
+- Keep `TRUST_PROXY=true` only when the service is behind Render's proxy (as configured in `render.yaml`). It makes rate limits use the real visitor address. Do not enable it on a server exposed directly to the internet.
+- Treat the dashboard as customer data: use a production HTTPS domain, restrict dashboard access at your hosting provider/VPN if possible, give every owner a separate account with MFA before more people need access, and use encrypted managed storage with backups rather than local JSON as usage grows.
 - Add a verified Resend sender and `RESEND_API_KEY` to enable reminder emails.
 - Host it behind HTTPS. Run the app continuously (or deploy a daily scheduled job) so scheduled reminder checks can be added reliably.
 - Connect a real payment provider. Stripe Checkout is the recommended route for one-time payments; do not build a card-number form into this site.

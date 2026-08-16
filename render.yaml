@@ -7,3 +7,5 @@ services:
     envVars:
       - key: ADMIN_PASSWORD
         generateValue: true
+      - key: TRUST_PROXY
+        value: true

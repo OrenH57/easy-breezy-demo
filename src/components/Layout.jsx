@@ -3,14 +3,20 @@ import { Menu, Phone } from 'lucide-react';
 import { useState } from 'react';
 import { Brand } from './Brand';
 import { HelperAgent } from './HelperAgent';
+import { getViewerLocationName, useViewerLocation } from '../hooks/useViewerLocation';
 
 const nav = [['/services', 'Services'], ['/pricing', 'Pricing'], ['/before-after', 'Results'], ['/service-areas', 'Service Areas']];
 
 export function Layout({ children }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const viewerLocation = useViewerLocation();
   const closeMenu = () => setMenuOpen(false);
+  const hasViewerCity = viewerLocation?.city && viewerLocation.countryCode === 'US';
+  const locationName = hasViewerCity ? getViewerLocationName(viewerLocation) : '';
+  const utilityText = hasViewerCity ? `Air duct, dryer vent & chimney services across ${locationName}` : 'Air duct, dryer vent & chimney services across Maryland and Washington, DC';
+  const footerText = hasViewerCity ? `Professional air duct, dryer vent and chimney cleaning for ${locationName}.` : 'Professional air duct, dryer vent and chimney cleaning for Maryland and Washington, DC.';
   return <>
-    <div className="utility">Air duct, dryer vent & chimney services across Maryland and Washington, DC</div>
+    <div className="utility" aria-live="polite">{utilityText}</div>
     <header>
       <Link to="/" className="logo" aria-label="Easy Breezy home"><Brand /></Link>
       <nav aria-label="Main navigation">{nav.map(([to, label]) => <NavLink key={to} to={to}>{label}</NavLink>)}</nav>
@@ -19,6 +25,6 @@ export function Layout({ children }) {
     {menuOpen && <nav className="mobile-nav" aria-label="Mobile navigation">{nav.map(([to, label]) => <NavLink key={to} to={to} onClick={closeMenu}>{label}</NavLink>)}<Link className="mobile-phone" to="/booking" onClick={closeMenu}><Phone /> Request a call</Link></nav>}
     {children}
     <HelperAgent />
-    <footer><Brand /><p>Professional air duct, dryer vent and chimney cleaning for Maryland and Washington, DC.</p><div><Link to="/services">Services</Link><Link to="/pricing">Pricing</Link><Link to="/service-areas">Service areas</Link><Link to="/admin">Owner sign in</Link></div></footer>
+    <footer><Brand /><p aria-live="polite">{footerText}</p><div><Link to="/services">Services</Link><Link to="/pricing">Pricing</Link><Link to="/service-areas">Service areas</Link><Link to="/admin">Owner sign in</Link></div></footer>
   </>;
 }

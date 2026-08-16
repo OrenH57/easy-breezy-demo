@@ -165,7 +165,9 @@ footer .brand{filter:drop-shadow(0 2px 4px rgba(0,0,0,.18))}
   .mobile-nav{background:#f5f2ff!important;border-color:#dfd8f5!important}
   .mobile-nav a.active{background:#e5ddff!important;color:#6037d7!important}
   .original-hero,.original-services{background:#fff!important}
-  .results-section{background:#faf9fd!important}
+  .results-section{background:#f6f8fc!important}
+  .trust-rail{background:#fff!important}
+  .quote-section{background:#f1edff!important}
   .dark-cta{background:#f7f5ff!important;color:#15244a!important;border-color:#dfd8fa!important}
   .dark-cta h2{color:#15244a!important}
   .dark-cta p{color:#5d6982!important}

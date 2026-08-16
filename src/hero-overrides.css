@@ -93,7 +93,7 @@ body{font-family:'Source Sans 3',Arial,sans-serif;color:#172038}.utility{height:
   .trust-rail article span{display:none!important}
   .original-services,.results-section{width:100%!important;padding:62px 20px!important}
   .section-top h2{font-size:38px!important;line-height:1.1!important}
-  .quote-section{width:100%!important}
+  .quote-section{width:auto!important}
 }
 
 /* Friendly type, disciplined system: bubbly display letters without playful UI chrome. */

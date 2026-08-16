@@ -131,14 +131,25 @@
 }
 
 @media (min-width: 651px) and (max-width: 1020px) {
-  .original-hero { grid-template-columns: minmax(340px, .95fr) minmax(340px, 1.05fr); padding-inline: 30px; }
+  .original-hero { grid-template-columns: minmax(300px, .95fr) minmax(300px, 1.05fr); padding-inline: 24px; }
   .original-hero h1 { font-size: clamp(47px, 5.5vw, 60px); }
   .original-hero-image { min-height: 520px; }
   .trust-rail { margin-inline: 24px !important; }
-  .original-services, .quote-section, .dark-cta { margin-inline: 24px !important; }
+  .original-services, .dark-cta { margin-inline: 24px !important; }
   .original-services { padding-inline: 0; }
   .results-section .section-top, .clean-gallery, .real-photo-note { max-width: calc(100vw - 48px); }
   .service-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .quote-section {
+    grid-template-columns: 1fr !important;
+    max-width: calc(100vw - 48px);
+    margin-inline: 24px !important;
+    padding: 0 !important;
+    gap: 0 !important;
+  }
+  .quote-copy { padding: 38px 32px !important; }
+  .quote-copy h2 { max-width: 100%; }
+  .quote-form { margin: 0 !important; padding: 26px !important; max-width: 100%; }
+  .quote-form .booking { grid-template-columns: 1fr !important; }
 }
 
 /* One unified lavender frame with purple reserved for action. */

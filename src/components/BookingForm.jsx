@@ -33,8 +33,8 @@ export function BookingForm({ compact = false, selectedService }) {
   }
   return <form className="booking" onSubmit={submit}>
     <label>Full name<input name="name" autoComplete="name" placeholder="Your full name" required /></label>
-    <label>Phone number <span className="field-optional">(phone or email required)</span><input name="phone" autoComplete="tel" inputMode="tel" placeholder="Best number to reach you" /></label>
-    <label>Email address <span className="field-optional">(phone or email required)</span><input name="email" type="email" autoComplete="email" placeholder="you@example.com" /></label>
+    <label>Phone number<input name="phone" autoComplete="tel" inputMode="tel" placeholder="Best number to reach you" /></label>
+    <label>Email address<input name="email" type="email" autoComplete="email" placeholder="you@example.com" /></label>
     <label>Service<select name="service" defaultValue={services.includes(selectedService) ? selectedService : services[0]}>{services.map((service) => <option key={service}>{service}</option>)}</select></label>
     <label>Preferred date <span className="field-optional">(optional)</span><input name="preferredDate" type="date" /></label>
     <label>Anything helpful? <span className="field-optional">(optional)</span><textarea name="notes" rows="3" placeholder="Home type, concern, or timing" /></label>

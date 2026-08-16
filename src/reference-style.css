@@ -120,3 +120,7 @@ body,button,input,select,textarea,.booking input,.booking select,.booking textar
 h1,h2,h3,.original-hero h1,.section-top h2,.service-card h3,.booking-shell h2,.quote-section h2{font-family:'Easy Breezy Fredoka',Arial,sans-serif;font-weight:600;letter-spacing:-.045em}
 .brand .brand-wordmark strong{font-family:'Easy Breezy Fredoka',Arial,sans-serif;font-weight:600;letter-spacing:-.055em}
 .button,nav,.phone-link,.original-call,.trust-rail strong{font-family:'Easy Breezy Nunito',Arial,sans-serif!important}
+
+/* Keep every public, booking, and owner-page type treatment on the same local pairing. */
+.page h1,.booking-page h1,.login-page h1,.admin-title h1,.admin-panel h2,.service-list h2,.chat-drawer h2,.form-kicker,.service-area-card strong,.about-layout figcaption,.services-intro figcaption{font-family:'Easy Breezy Fredoka',Arial,sans-serif!important;font-weight:600}
+.page,.booking-page,.login-page,.admin-page,.admin-side,.admin-content,.booking,.booking input,.booking select,.booking textarea,.before-after figcaption,.before-after figcaption strong,.services-intro figcaption,table,th,td{font-family:'Easy Breezy Nunito',Arial,sans-serif}

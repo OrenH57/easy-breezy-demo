@@ -7,10 +7,14 @@ const normalizeLocation = ({ city, region, regionCode, countryCode, latitude, lo
   : null;
 
 async function getLocationFromServer(signal) {
-  const response = await fetch('/api/location', { signal, cache: 'no-store' });
-  if (!response.ok) throw new Error('Location service unavailable');
-  const { location } = await response.json();
-  return normalizeLocation(location || {});
+  try {
+    const response = await fetch('/api/location', { signal, cache: 'no-store' });
+    if (!response.ok) return null;
+    const { location } = await response.json();
+    return normalizeLocation(location || {});
+  } catch {
+    return null;
+  }
 }
 
 function loadViewerLocation() {

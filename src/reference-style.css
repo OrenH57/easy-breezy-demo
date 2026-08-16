@@ -115,6 +115,33 @@ footer .brand{filter:drop-shadow(0 2px 4px rgba(0,0,0,.18))}
 .hero-points span{display:inline-flex;align-items:center;gap:6px}.hero-points span svg{width:16px;height:16px;color:#7047e8;fill:#efe9ff;stroke-width:2.3}
 .form-status-error{color:#a12d3d!important;font-weight:800}
 
+/* The booking area uses the same rounded-card language as the rest of the site. */
+.quote-section{
+  gap:24px!important;
+  padding:24px!important;
+  border-radius:24px!important;
+  background:#efecff!important;
+  overflow:visible!important;
+}
+.quote-copy{
+  border-radius:18px!important;
+  padding:48px 46px!important;
+}
+.quote-form{
+  align-self:stretch!important;
+  display:flex!important;
+  align-items:center!important;
+  margin:0!important;
+  padding:30px!important;
+  border-radius:18px!important;
+}
+.quote-form .booking{width:100%!important}
+@media(max-width:650px){
+  .quote-section{margin:40px 16px!important;padding:16px!important;border-radius:20px!important}
+  .quote-copy{padding:34px 24px!important;border-radius:14px!important}
+  .quote-form{margin:0!important;padding:22px 18px!important;border-radius:14px!important}
+}
+
 /* Exact type pairing from the supplied reference image. */
 body,button,input,select,textarea,.booking input,.booking select,.booking textarea,.booking label,.text-link,footer>div:last-child{font-family:'Easy Breezy Nunito',Arial,sans-serif}
 h1,h2,h3,.original-hero h1,.section-top h2,.service-card h3,.booking-shell h2,.quote-section h2{font-family:'Easy Breezy Fredoka',Arial,sans-serif;font-weight:600;letter-spacing:-.045em}

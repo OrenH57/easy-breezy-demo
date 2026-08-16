@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 
 const BASE_RGB = '111,75,232';
 const HIGHLIGHT_RGB = '163,138,245';
+const FRAME_INTERVAL = 1000 / 30; // decorative background: 30fps is plenty and cheaper
 
 function rand(min, max) { return min + Math.random() * (max - min); }
 function lerp(a, b, t) { return a + (b - a) * t; }
@@ -34,6 +35,7 @@ export function WindStreaks() {
     let dpr = 1;
     let raf = null;
     let running = false;
+    let inView = true;
     let last = 0;
     let clock = 0;
     const pointer = { x: -9999, y: -9999, active: false, fade: 0 };
@@ -63,14 +65,14 @@ export function WindStreaks() {
     }
 
     function seed() {
-      const count = Math.max(50, Math.round((width * height) / 3200));
+      const count = Math.max(36, Math.round((width * height) / 4200));
       particles = Array.from({ length: count }, makeParticle);
       motes = Array.from({ length: Math.max(3, Math.round(count / 24)) }, makeMote);
     }
 
     function resize() {
       const rect = parent.getBoundingClientRect();
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       width = rect.width;
       height = rect.height;
       canvas.width = Math.max(1, Math.round(width * dpr));
@@ -80,30 +82,40 @@ export function WindStreaks() {
       seed();
     }
 
-    function pointerPosFromEvent(e) {
+    // Tracked on window (not the canvas) since the canvas is pointer-events:none
+    // so it never sits behind the click target; events still bubble from
+    // whatever's underneath, and getBoundingClientRect() here re-reads the
+    // canvas's live position each time, so this also stays correct through scroll.
+    function updatePointerFromClient(clientX, clientY) {
       const rect = canvas.getBoundingClientRect();
-      const t = e.touches ? e.touches[0] : e;
-      return { x: t.clientX - rect.left, y: t.clientY - rect.top };
-    }
-    function onPointerMove(e) {
-      const p = pointerPosFromEvent(e);
-      pointer.x = p.x;
-      pointer.y = p.y;
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
+      const margin = 40;
+      if (x < -margin || x > width + margin || y < -margin || y > height + margin) {
+        pointer.active = false;
+        return;
+      }
+      pointer.x = x;
+      pointer.y = y;
       pointer.active = true;
       pointer.fade = 1;
     }
-    function onPointerEnd() { pointer.active = false; }
+    function onMouseMove(e) { updatePointerFromClient(e.clientX, e.clientY); }
+    function onTouchMove(e) {
+      const t = e.touches && e.touches[0];
+      if (t) updatePointerFromClient(t.clientX, t.clientY);
+    }
+    function onTouchEnd() { pointer.active = false; }
 
     function frame(now) {
+      raf = requestAnimationFrame(frame);
+      if (now - last < FRAME_INTERVAL) return;
       const dt = Math.min((now - last) / 1000, 0.05);
       last = now;
       clock += dt;
       if (!pointer.active) pointer.fade = Math.max(0, pointer.fade - dt * 0.5);
 
-      // Repaint a translucent wash of the page's own background color so old
-      // strokes fade into a trail instead of vanishing instantly.
-      ctx.fillStyle = 'rgba(255,255,255,0.15)';
-      ctx.fillRect(0, 0, width, height);
+      ctx.clearRect(0, 0, width, height);
 
       for (const m of motes) {
         m.phase += dt * 0.35;
@@ -158,8 +170,6 @@ export function WindStreaks() {
           p.x = -10;
         }
       }
-
-      if (running) raf = requestAnimationFrame(frame);
     }
 
     function start() {
@@ -168,10 +178,9 @@ export function WindStreaks() {
       resize();
       last = performance.now();
       raf = requestAnimationFrame(frame);
-      canvas.addEventListener('pointermove', onPointerMove);
-      canvas.addEventListener('touchmove', onPointerMove, { passive: true });
-      canvas.addEventListener('pointerleave', onPointerEnd);
-      canvas.addEventListener('touchend', onPointerEnd);
+      window.addEventListener('mousemove', onMouseMove, { passive: true });
+      window.addEventListener('touchmove', onTouchMove, { passive: true });
+      window.addEventListener('touchend', onTouchEnd, { passive: true });
     }
 
     function stop() {
@@ -179,20 +188,25 @@ export function WindStreaks() {
       if (raf) cancelAnimationFrame(raf);
       raf = null;
       ctx.clearRect(0, 0, width, height);
-      canvas.removeEventListener('pointermove', onPointerMove);
-      canvas.removeEventListener('touchmove', onPointerMove);
-      canvas.removeEventListener('pointerleave', onPointerEnd);
-      canvas.removeEventListener('touchend', onPointerEnd);
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onTouchEnd);
     }
 
     function syncToViewport() {
-      if (mobileQuery.matches && !document.hidden) start();
+      if (mobileQuery.matches && !document.hidden && inView) start();
       else stop();
     }
 
     syncToViewport();
     mobileQuery.addEventListener('change', syncToViewport);
     document.addEventListener('visibilitychange', syncToViewport);
+
+    const io = new IntersectionObserver(([entry]) => {
+      inView = entry.isIntersecting;
+      syncToViewport();
+    }, { threshold: 0.05 });
+    io.observe(parent);
 
     const ro = new ResizeObserver(() => { if (running) resize(); });
     ro.observe(parent);
@@ -201,6 +215,7 @@ export function WindStreaks() {
       stop();
       mobileQuery.removeEventListener('change', syncToViewport);
       document.removeEventListener('visibilitychange', syncToViewport);
+      io.disconnect();
       ro.disconnect();
     };
   }, []);

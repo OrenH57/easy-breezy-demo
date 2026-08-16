@@ -141,39 +141,53 @@
   .service-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
-/* One authoritative frame: navy carries the site structure, purple carries action. */
+/* One unified lavender frame with purple reserved for action. */
 header,
 footer {
-  background: #13264a !important;
+  background: #f5f2ff !important;
 }
 
 header {
   max-width: none;
   height: 98px;
   padding-inline: max(18px, calc((100vw - var(--max)) / 2));
-  color: #fff;
-  border-bottom: 1px solid rgba(203, 189, 255, .22) !important;
-  box-shadow: 0 6px 18px rgba(8, 20, 48, .16) !important;
+  color: #111630;
+  border-bottom: 1px solid #dfd8f5 !important;
+  box-shadow: 0 4px 14px rgba(49, 32, 116, .05) !important;
 }
 
 header .logo {
-  display: flex;
-  align-items: center;
-  padding: 6px 9px;
-  border-radius: 10px;
-  background: #fff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, .12);
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 header nav a,
-header .phone-link { color: #fff !important; }
+header .phone-link { color: #111630 !important; }
 header nav a:hover,
-header nav a.active { color: #d5c9ff !important; border-color: #8e72ef !important; }
+header nav a.active { color: #6037d7 !important; border-color: #7c55e7 !important; }
 header .header-book { background: #6845e7 !important; }
 
 footer {
-  border-top: 1px solid rgba(203, 189, 255, .18);
+  color: #15244a;
+  border-top: 1px solid #dfd8f5;
 }
+footer p { color: #5d6982 !important; }
+footer > div:last-child { color: #15244a !important; }
+footer .brand { filter: none; }
+
+/* Lavender booking panel, matching the rest of the public-facing cards. */
+.quote-copy {
+  background: radial-gradient(circle at 88% 12%, rgba(120, 88, 239, .16), transparent 34%), #e5ddff !important;
+  color: #15244a !important;
+}
+.quote-copy h2 { color: #15244a !important; }
+.quote-section .quote-copy .quote-kicker { color: #6845e7 !important; }
+.quote-section .quote-copy > p:not(.eyebrow),
+.quote-section .quote-copy li { color: #465779 !important; }
+.quote-section .quote-copy .quote-reassurance { color: #15244a !important; }
+.quote-copy .quote-reassurance li::before { background: #7956ed !important; }
+.quote-copy::after { color: rgba(104, 69, 231, .12) !important; }
 
 @media (max-width: 650px) {
   header {
@@ -181,6 +195,6 @@ footer {
     padding-inline: 18px;
   }
 
-  header .logo { padding: 4px 7px; border-radius: 8px; }
-  .mobile-menu-toggle { background: #fff !important; color: #13264a !important; border-color: #fff !important; }
+  header .logo { padding: 0; }
+  .mobile-menu-toggle { background: #fff !important; color: #13264a !important; border-color: #ddd8ee !important; }
 }

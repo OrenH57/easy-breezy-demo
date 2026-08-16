@@ -126,7 +126,15 @@ footer .brand{filter:drop-shadow(0 2px 4px rgba(0,0,0,.18))}
 .quote-copy{
   border-radius:18px!important;
   padding:48px 46px!important;
+  background:radial-gradient(circle at 88% 12%,rgba(120,88,239,.16),transparent 34%),#e5ddff!important;
+  color:#15244a!important;
 }
+.quote-copy h2{color:#15244a!important}
+.quote-copy .quote-kicker{color:#6845e7!important}
+.quote-copy>p,.quote-copy li{color:#465779!important}
+.quote-copy .quote-reassurance{color:#15244a!important}
+.quote-copy .quote-reassurance li::before{background:#7956ed!important}
+.quote-copy::after{color:rgba(104,69,231,.12)!important}
 .quote-form{
   align-self:stretch!important;
   display:flex!important;
@@ -134,6 +142,9 @@ footer .brand{filter:drop-shadow(0 2px 4px rgba(0,0,0,.18))}
   margin:0!important;
   padding:30px!important;
   border-radius:18px!important;
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
 }
 .quote-form .booking{width:100%!important}
 @media(max-width:650px){

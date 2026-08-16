@@ -118,7 +118,7 @@ footer .brand{filter:drop-shadow(0 2px 4px rgba(0,0,0,.18))}
 /* Small drifting wind marks + leaves behind the hero heading, same technique for both (see WindStreaks.jsx). */
 .hero-breeze{display:block;position:absolute;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
 
-.wind-mark{position:absolute;width:22px;height:11px;border-top:2px solid rgba(124,109,240,.6);border-radius:50%;opacity:0}
+.wind-mark{position:absolute;width:28px;height:5px;border-radius:999px;background:linear-gradient(90deg,transparent,rgba(124,109,240,.8) 28%,rgba(124,109,240,.8) 72%,transparent);opacity:0}
 .wind-mark-1{animation:wind-mark-a 8s linear infinite}
 .wind-mark-2{animation:wind-mark-b 10s linear infinite 3.4s}
 .wind-mark-3{animation:wind-mark-c 9s linear infinite 6.1s}

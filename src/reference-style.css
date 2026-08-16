@@ -122,25 +122,69 @@ footer .brand{filter:drop-shadow(0 2px 4px rgba(0,0,0,.18))}
 .wind-gust-squash{display:block;transform:scaleY(.6)}
 .wind-gust-img{display:block;width:100%;height:auto;opacity:.9}
 .wind-gust-tint{position:absolute;inset:0;background:#7c6df0;mix-blend-mode:multiply;opacity:.6;-webkit-mask-image:var(--gust-mask);-webkit-mask-size:100% 100%;-webkit-mask-repeat:no-repeat;mask-image:var(--gust-mask);mask-size:100% 100%;mask-repeat:no-repeat}
-.wind-gust-1{width:70%;max-width:340px;left:-42%;top:12%;animation:wind-gust-sweep-a 2.6s ease-in-out infinite}
-.wind-gust-2{width:50%;max-width:230px;left:-40%;top:50%;animation:wind-gust-sweep-b 2.9s ease-in-out infinite 1.1s}
-@keyframes wind-gust-sweep-a{
-  0%{transform:translate(0,0) rotate(0deg)}
-  18%{transform:translate(47%,-20px) rotate(-3deg)}
-  36%{transform:translate(94%,12px) rotate(2deg)}
-  54%{transform:translate(141%,-18px) rotate(-3deg)}
-  72%{transform:translate(188%,10px) rotate(2deg)}
-  90%{transform:translate(235%,-8px) rotate(-1deg)}
-  100%{transform:translate(260%,0) rotate(0deg)}
+.wind-gust-1{width:70%;max-width:340px;left:-42%;top:12%;animation:wind-gust-pulse-a 3.6s linear infinite}
+.wind-gust-2{width:50%;max-width:230px;left:-40%;top:50%;animation:wind-gust-pulse-b 4s linear infinite 1.1s}
+/* Steady horizontal travel with a repeating ECG-style pulse in Y: mostly flat,
+   then a sharp P/QRS/T spike, three beats per full sweep. */
+@keyframes wind-gust-pulse-a{
+  0%{transform:translate(0,0)}
+  2%{transform:translate(5%,-3px)}
+  3%{transform:translate(8%,0)}
+  5%{transform:translate(13%,3px)}
+  5.5%{transform:translate(14%,-42px)}
+  6%{transform:translate(16%,18px)}
+  6.5%{transform:translate(17%,0)}
+  9%{transform:translate(23%,-6px)}
+  10%{transform:translate(26%,0)}
+  33.3%{transform:translate(87%,0)}
+  35.3%{transform:translate(92%,-3px)}
+  36.3%{transform:translate(94%,0)}
+  38.3%{transform:translate(100%,3px)}
+  38.8%{transform:translate(101%,-42px)}
+  39.3%{transform:translate(102%,18px)}
+  39.8%{transform:translate(103%,0)}
+  42.3%{transform:translate(110%,-6px)}
+  43.3%{transform:translate(113%,0)}
+  66.6%{transform:translate(173%,0)}
+  68.6%{transform:translate(178%,-3px)}
+  69.6%{transform:translate(181%,0)}
+  71.6%{transform:translate(186%,3px)}
+  72.1%{transform:translate(187%,-42px)}
+  72.6%{transform:translate(189%,18px)}
+  73.1%{transform:translate(190%,0)}
+  75.6%{transform:translate(197%,-6px)}
+  76.6%{transform:translate(199%,0)}
+  100%{transform:translate(260%,0)}
 }
-@keyframes wind-gust-sweep-b{
-  0%{transform:translate(0,0) rotate(0deg)}
-  18%{transform:translate(56%,16px) rotate(3deg)}
-  36%{transform:translate(112%,-14px) rotate(-2deg)}
-  54%{transform:translate(168%,18px) rotate(3deg)}
-  72%{transform:translate(224%,-10px) rotate(-2deg)}
-  90%{transform:translate(280%,9px) rotate(1deg)}
-  100%{transform:translate(310%,0) rotate(0deg)}
+@keyframes wind-gust-pulse-b{
+  0%{transform:translate(0,0)}
+  2%{transform:translate(6%,-2px)}
+  3%{transform:translate(9%,0)}
+  5%{transform:translate(16%,2px)}
+  5.5%{transform:translate(17%,-34px)}
+  6%{transform:translate(19%,14px)}
+  6.5%{transform:translate(20%,0)}
+  9%{transform:translate(28%,-5px)}
+  10%{transform:translate(31%,0)}
+  33.3%{transform:translate(103%,0)}
+  35.3%{transform:translate(109%,-2px)}
+  36.3%{transform:translate(113%,0)}
+  38.3%{transform:translate(119%,2px)}
+  38.8%{transform:translate(120%,-34px)}
+  39.3%{transform:translate(122%,14px)}
+  39.8%{transform:translate(123%,0)}
+  42.3%{transform:translate(131%,-5px)}
+  43.3%{transform:translate(134%,0)}
+  66.6%{transform:translate(206%,0)}
+  68.6%{transform:translate(213%,-2px)}
+  69.6%{transform:translate(216%,0)}
+  71.6%{transform:translate(222%,2px)}
+  72.1%{transform:translate(224%,-34px)}
+  72.6%{transform:translate(225%,14px)}
+  73.1%{transform:translate(227%,0)}
+  75.6%{transform:translate(234%,-5px)}
+  76.6%{transform:translate(237%,0)}
+  100%{transform:translate(310%,0)}
 }
 
 .wind-leaf{position:absolute;width:9px;height:9px;background:#6da85c;border-radius:0 100% 0 100%;opacity:0}

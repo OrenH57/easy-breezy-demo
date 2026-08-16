@@ -1,4 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Lilita+One&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@font-face{font-family:'Easy Breezy Fredoka';font-style:normal;font-weight:600;font-display:swap;src:url('./assets/fredoka-600.ttf') format('truetype')}
+@font-face{font-family:'Easy Breezy Nunito';font-style:normal;font-weight:400;font-display:swap;src:url('./assets/nunito-sans-400.ttf') format('truetype')}
+@font-face{font-family:'Easy Breezy Nunito';font-style:normal;font-weight:600;font-display:swap;src:url('./assets/nunito-sans-600.ttf') format('truetype')}
+@font-face{font-family:'Easy Breezy Nunito';font-style:normal;font-weight:700;font-display:swap;src:url('./assets/nunito-sans-700.ttf') format('truetype')}
+@font-face{font-family:'Easy Breezy Nunito';font-style:normal;font-weight:800;font-display:swap;src:url('./assets/nunito-sans-800.ttf') format('truetype')}
 
 :root{--ink:#102142;--paper:#f6f8fc;--surface:#fff;--accent:#6d4be8;--accent-dark:#5536cc;--lime:#cbbdff;--sage:#6d4be8;--muted:#667087;--line:#e1e5f0;--navy:#102142;--max:1280px}
 .results-section .section-top h2::first-letter{color:#fff}
@@ -110,7 +115,8 @@ footer .brand{filter:drop-shadow(0 2px 4px rgba(0,0,0,.18))}
 .hero-points span{display:inline-flex;align-items:center;gap:6px}.hero-points span svg{width:16px;height:16px;color:#7047e8;fill:#efe9ff;stroke-width:2.3}
 .form-status-error{color:#a12d3d!important;font-weight:800}
 
-/* Restore the friendly type pairing used in the approved hero reference. */
-body,button,input,select,textarea{font-family:'Nunito Sans',Arial,sans-serif}
-h1,h2,h3,.original-hero h1,.section-top h2,.booking-shell h2,.quote-section h2{font-family:'Fredoka',Arial,sans-serif;font-weight:600;letter-spacing:-.045em}
-.brand .brand-wordmark strong,.button,nav,.phone-link,.original-call,.trust-rail strong{font-family:'Nunito Sans',Arial,sans-serif}
+/* Exact type pairing from the supplied reference image. */
+body,button,input,select,textarea,.booking input,.booking select,.booking textarea,.booking label,.text-link,footer>div:last-child{font-family:'Easy Breezy Nunito',Arial,sans-serif}
+h1,h2,h3,.original-hero h1,.section-top h2,.service-card h3,.booking-shell h2,.quote-section h2{font-family:'Easy Breezy Fredoka',Arial,sans-serif;font-weight:600;letter-spacing:-.045em}
+.brand .brand-wordmark strong{font-family:'Easy Breezy Fredoka',Arial,sans-serif;font-weight:600;letter-spacing:-.055em}
+.button,nav,.phone-link,.original-call,.trust-rail strong{font-family:'Easy Breezy Nunito',Arial,sans-serif!important}

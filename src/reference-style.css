@@ -109,3 +109,8 @@ footer .brand{filter:drop-shadow(0 2px 4px rgba(0,0,0,.18))}
 .original-hero-image{background:#f7f4ff;box-shadow:0 0 34px 12px rgba(255,255,255,.78)}.original-hero-image>img{opacity:.82;filter:saturate(.88) contrast(.96)}.original-hero-image::after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(255,255,255,.36),rgba(255,255,255,.06) 16%,transparent 33%,transparent 72%,rgba(245,241,255,.20)),linear-gradient(0deg,rgba(255,255,255,.20),transparent 19%,transparent 77%,rgba(255,255,255,.18))}.hero-location{z-index:3}@media(min-width:651px){.original-hero-image>img{opacity:.88}}
 .hero-points span{display:inline-flex;align-items:center;gap:6px}.hero-points span svg{width:16px;height:16px;color:#7047e8;fill:#efe9ff;stroke-width:2.3}
 .form-status-error{color:#a12d3d!important;font-weight:800}
+
+/* Restore the friendly type pairing used in the approved hero reference. */
+body,button,input,select,textarea{font-family:'Nunito Sans',Arial,sans-serif}
+h1,h2,h3,.original-hero h1,.section-top h2,.booking-shell h2,.quote-section h2{font-family:'Fredoka',Arial,sans-serif;font-weight:600;letter-spacing:-.045em}
+.brand .brand-wordmark strong,.button,nav,.phone-link,.original-call,.trust-rail strong{font-family:'Nunito Sans',Arial,sans-serif}

@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "easy-breezy-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 5173
+    },
+    {
+      "name": "eb-backend",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["server.cjs"],
+      "port": 4173
+    }
+  ]
+}

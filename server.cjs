@@ -16,6 +16,8 @@ const config = {
   adminPassword: process.env.ADMIN_PASSWORD || '',
   fromEmail: process.env.FROM_EMAIL || '',
   resendKey: process.env.RESEND_API_KEY || '',
+  ownerEmail: process.env.OWNER_EMAIL || '',
+  openaiKey: process.env.OPENAI_API_KEY || '',
 };
 const empty = () => ({ clients: [], messages: [], payments: [], reminders: [] });
 let db = fs.existsSync(dbFile) ? JSON.parse(fs.readFileSync(dbFile, 'utf8')) : empty();
@@ -24,7 +26,7 @@ const loginAttempts = new Map();
 const requestLimits = new Map();
 const locationCache = new Map();
 const isProduction = process.env.NODE_ENV === 'production';
-const trustProxy = process.env.TRUST_PROXY === 'true';
+const trustProxy = String(process.env.TRUST_PROXY || '').trim().toLowerCase() === 'true';
 const secureCookies = isProduction || trustProxy;
 const sessionLifetime = 8 * 60 * 60 * 1000;
 const loginWindow = 15 * 60 * 1000;
@@ -113,6 +115,59 @@ async function sendReminder(reminder) {
   return { sent: true, message: 'Reminder email sent. The next annual reminder has been scheduled.' };
 }
 
+async function notifyOwner(subject, lines) {
+  if (!config.resendKey || !config.fromEmail || !config.ownerEmail) return;
+  try {
+    const response = await fetch('https://api.resend.com/emails', { method: 'POST', headers: { Authorization: `Bearer ${config.resendKey}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ from: config.fromEmail, to: [config.ownerEmail], subject, text: lines.filter(Boolean).join('\n') }) });
+    if (!response.ok) console.error('Owner notification email was rejected by the provider.');
+  } catch (error) { console.error('Owner notification email failed:', error.message); }
+}
+
+const mayaSystemPrompt = [
+  'You are Maya, the on-site sales and support assistant for Easy Breezy Air Duct and Chimney Services, a home-services company serving homeowners and businesses across Maryland and Washington, DC.',
+  '',
+  'Your job: help visitors quickly figure out which service fits their situation, answer their questions using only the facts below, build enough confidence that they submit the estimate request form, and do it in a way that feels like a genuinely helpful local expert, not a pushy salesperson.',
+  '',
+  'Services offered, and why each matters:',
+  '- Air duct cleaning: clears dust, debris, and allergens from the full duct run so air actually moves evenly to every room, not just the vents closest to the unit.',
+  '- Dryer vent cleaning: trapped lint is a leading cause of house fires and slows drying time; clearing the line fixes both.',
+  '- Chimney cleaning & sweep: removes built-up creosote and soot so a fireplace is safe to use, not just tidy-looking.',
+  '- Furnace cleaning: cleans the blower compartment and surrounding components so the furnace runs cleaner and quieter.',
+  '- Carpet cleaning: deep extraction of ground-in stains, pet dander, and trapped allergens.',
+  '- Commercial air duct cleaning: scheduled around business hours, coordinated for multi-unit or multi-tenant access.',
+  '',
+  'Pricing and process facts (do not invent numbers beyond this):',
+  '- Estimates are always free and given before any work begins.',
+  '- The price depends on system size / number of vents, how easy the system is to access, its current condition, and any add-ons requested.',
+  '- No hidden fees; if anything changes once work starts, the customer is told and approves it before extra charges apply.',
+  '- Easy Breezy serves homeowners and businesses across Maryland and Washington, DC.',
+  '',
+  'How to run the conversation:',
+  '1. If it is not already obvious, ask one short, natural question to understand what is going on (e.g. what they are noticing, and whether it is a home or business).',
+  '2. Match what they describe to the right service and briefly explain why it matters, in plain language, using the facts above.',
+  '3. Once you have a sense of what they need, invite them to request their free estimate — mention it takes under a minute and there is no obligation.',
+  '4. If asked something outside these facts (exact price, exact appointment times, guarantees, service outside MD/DC), be honest that you cannot promise that from chat and point them to requesting an estimate or calling, rather than guessing.',
+  '',
+  'Style: warm, direct, plain language, no corporate jargon, no emojis. Keep replies to 2-4 sentences. Ask at most one question per reply. Never fabricate prices, availability, timelines, or guarantees not listed above.',
+].join('\n');
+async function askMaya(message, history) {
+  if (!config.openaiKey) { const error = Error('Maya is not configured yet. Set OPENAI_API_KEY before enabling the assistant.'); error.status = 503; throw error; }
+  const safeHistory = Array.isArray(history) ? history.slice(-8).filter((turn) => turn && (turn.role === 'user' || turn.role === 'assistant') && typeof turn.content === 'string').map((turn) => ({ role: turn.role, content: clean(turn.content) })) : [];
+  const messages = [{ role: 'system', content: mayaSystemPrompt }, ...safeHistory, { role: 'user', content: clean(message) }];
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 12_000);
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', { method: 'POST', signal: controller.signal, headers: { Authorization: `Bearer ${config.openaiKey}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ model: 'gpt-4o-mini', messages, temperature: 0.5, max_tokens: 260 }) });
+    if (!response.ok) { const error = Error('Maya is temporarily unavailable. Please try again shortly.'); error.status = 502; throw error; }
+    const data = await response.json();
+    const reply = data?.choices?.[0]?.message?.content?.trim();
+    if (!reply) { const error = Error('Maya is temporarily unavailable. Please try again shortly.'); error.status = 502; throw error; }
+    return reply;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 const passwordHash = (value) => crypto.createHash('sha256').update(value).digest();
 const server = http.createServer(async (req, res) => {
   try {
@@ -147,14 +202,27 @@ const server = http.createServer(async (req, res) => {
       const client = { id: id(), requestId, stateCode: clean(input.stateCode), stateName: state.name, name: clean(input.name), phone: clean(input.phone), email: clean(input.email), service: clean(input.service) || 'Air duct cleaning', preferredDate: clean(input.preferredDate), notes: clean(input.notes), createdAt: new Date().toISOString() };
       db.clients.push(client);
       if (input.reminderConsent === true) db.reminders.push({ id: id(), clientId: client.id, clientName: client.name, stateName: state.name, service: client.service, dueDate: plusYear(client.preferredDate), sentAt: null });
-      save(); return json(res, 201, { ok: true });
+      save();
+      notifyOwner(`New lead: ${client.name}`, [`Name: ${client.name}`, `Phone: ${client.phone}`, `Email: ${client.email}`, `Service: ${client.service}`, `State: ${client.stateName}`, `Preferred date: ${client.preferredDate}`, `Notes: ${client.notes}`]);
+      return json(res, 201, { ok: true });
     }
     if (req.method === 'POST' && url.pathname === '/api/chat') {
       if (!requestAllowed(req, 'chat', maxPublicWrites, publicWriteWindow)) return json(res, 429, { error: 'Too many requests. Please try again later.' });
       const input = await body(req); const state = serviceState(input.stateCode);
       if (!state?.enabled) return json(res, 400, { error: 'This service area is not live yet.' });
       if (!clean(input.name) || !clean(input.phone) || !clean(input.message)) return json(res, 400, { error: 'Name, phone, and a message are required.' });
-      db.messages.push({ id: id(), stateCode: clean(input.stateCode), stateName: state.name, name: clean(input.name), phone: clean(input.phone), message: clean(input.message), createdAt: new Date().toISOString() }); save(); return json(res, 201, { ok: true });
+      const contact = { id: id(), stateCode: clean(input.stateCode), stateName: state.name, name: clean(input.name), phone: clean(input.phone), message: clean(input.message), createdAt: new Date().toISOString() };
+      db.messages.push(contact); save();
+      notifyOwner(`New message: ${contact.name}`, [`Name: ${contact.name}`, `Phone: ${contact.phone}`, `State: ${contact.stateName}`, `Message: ${contact.message}`]);
+      return json(res, 201, { ok: true });
+    }
+    if (req.method === 'POST' && url.pathname === '/api/maya') {
+      if (!requestAllowed(req, 'maya', maxPublicWrites, publicWriteWindow)) return json(res, 429, { error: 'Too many requests. Please try again later.' });
+      if (!config.openaiKey) return json(res, 503, { error: 'Maya is not configured yet. Set OPENAI_API_KEY before enabling the assistant.' });
+      const input = await body(req);
+      if (!clean(input.message)) return json(res, 400, { error: 'Please include a message.' });
+      const reply = await askMaya(input.message, input.history);
+      return json(res, 200, { reply });
     }
     if (req.method === 'POST' && url.pathname === '/api/admin/login') { if (!config.adminPassword) return json(res, 503, { error: 'Owner access is not configured yet. Set ADMIN_PASSWORD before signing in.' }); if (!loginAllowed(req)) return json(res, 429, { error: 'Too many attempts. Please wait 15 minutes, then try again.' }); const input = await body(req); if (!crypto.timingSafeEqual(passwordHash(clean(input.password)), passwordHash(config.adminPassword))) { recordFailedLogin(req); return json(res, 401, { error: 'We could not sign you in. Check your password and try again.' }); } clearFailedLogins(req); const token = id(); sessions.set(token, Date.now() + sessionLifetime); res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'Set-Cookie': sessionCookie(token), 'X-Content-Type-Options': 'nosniff' }); return res.end('{"ok":true}'); }
     if (req.method === 'POST' && url.pathname === '/api/admin/logout') { if (!validSameOrigin(req)) return json(res, 403, { error: 'Invalid request origin.' }); sessions.delete(cookies(req).eb_session); res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'Set-Cookie': sessionCookie('', 0), 'X-Content-Type-Options': 'nosniff' }); return res.end('{"ok":true}'); }

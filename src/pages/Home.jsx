@@ -1,32 +1,68 @@
 import { Link } from 'react-router-dom';
-import { BadgeCheck, CalendarDays, CircleDollarSign, Heart, MapPin, Sparkles } from 'lucide-react';
-import { WindStreaks } from '../components/WindStreaks';
+import { BadgeCheck, CalendarDays, CircleDollarSign, Heart, Sparkles } from 'lucide-react';
 import familyHero from '../assets/easy-breezy-family-hero-final.webp';
 import residentialImage from '../assets/service/easy-breezy-duct-technician.webp';
 import dryerImage from '../assets/service/easy-breezy-dryer-technician.webp';
 import chimneyImage from '../assets/service/easy-breezy-chimney-technician.webp';
 import commercialImage from '../assets/service/easy-breezy-commercial-back.webp';
-import cleanDuctInterior from '../assets/clean-duct-interior.webp';
-import cleanCeilingVent from '../assets/clean-ceiling-vent.webp';
-import cleanFloorVent from '../assets/clean-floor-vent.png';
-import { BookingForm } from '../components/BookingForm';
 import { HeroLocation } from '../components/HeroLocation';
-import { AvailabilityCard } from '../components/AvailabilityCard';
+import { BookingForm } from '../components/BookingForm';
 import { TrustLocation } from '../components/TrustLocation';
+import { getViewerLocationName, useViewerLocation } from '../hooks/useViewerLocation';
+import workerWithLogo from '../assets/before-after/worker-with-logo.jpg';
+import chimneyCapBefore1 from '../assets/before-after/chimney-cap-before-1.jpg';
+import chimneyCapAfter1 from '../assets/before-after/chimney-cap-after-1.jpg';
+import chimneyCapBefore2 from '../assets/before-after/chimney-cap-before-2.jpg';
+import chimneyCapAfter2 from '../assets/before-after/chimney-cap-after-2.jpg';
+import dryerVentBefore from '../assets/before-after/dryer-vent-before.jpg';
+import dryerVentAfter from '../assets/before-after/dryer-vent-after.jpg';
+import ductBefore from '../assets/before-after/duct-before.jpg';
+import ductAfter from '../assets/before-after/duct-after.jpg';
 
 const trust = [[CircleDollarSign, 'Free estimates'], [BadgeCheck, 'Respectful in-home service'], [CalendarDays, 'Easy online booking']];
-const services = [[residentialImage, 'Air Duct Cleaning', '/air-duct-cleaning/'], [dryerImage, 'Dryer Vent Cleaning', '/dryer-vent-cleaning/'], [chimneyImage, 'Chimney Cleaning', '/chimney-cleaning/'], [commercialImage, 'Commercial Duct Cleaning', '/commercial-air-duct-cleaning/']];
-const cleanGallery = [[cleanDuctInterior, 'Inside the system', 'A cleaner system supports fresher air throughout your home.'], [cleanCeilingVent, 'Clean finishes', 'Fresh-looking vents help a room feel cared for.']];
+const services = [
+  [residentialImage, 'Air Duct Cleaning', '/air-duct-cleaning/', "Dust and allergens build up fast — most homeowners are surprised at what actually comes out. Breathe easier with a full duct cleaning, not just a surface wipe."],
+  [dryerImage, 'Dryer Vent Cleaning', '/dryer-vent-cleaning/', "Trapped lint is a leading cause of house fires, and it's slowing your dryer down right now. One visit fixes both."],
+  [chimneyImage, 'Chimney Cleaning', '/chimney-cleaning/', "Creosote buildup turns a cozy fireplace into a fire hazard. Get swept and inspected before burning season starts."],
+  [commercialImage, 'Commercial Duct Cleaning', '/commercial-air-duct-cleaning/', "Poor air quality sends employees home sick and drives up energy costs. We work around your hours so operations never stop."],
+];
+const beforeAfterPairs = [
+  [chimneyCapBefore1, chimneyCapAfter2, 'Chimney cap, replaced', 'Rusted-through mesh cap swapped for a new stainless cap — keeps rain and animals out for good.'],
+  [chimneyCapBefore2, chimneyCapAfter1, 'Chimney chase top, restored', 'Corroded flashing on the chase cover fully replaced instead of patched over.'],
+  [dryerVentBefore, dryerVentAfter, 'Dryer vent, cleared', 'Years of lint and cobwebs pulled from the line — this is a real fire-risk reduction, not just a tidy-up.'],
+  [ductBefore, ductAfter, 'Supply duct, cleaned out', 'Built-up dust cleared from the run so air can actually move through it again.'],
+];
 
-export default function Home() { return <>
+export default function Home() {
+  const viewerLocation = useViewerLocation();
+  const hasViewerCity = viewerLocation?.city && viewerLocation.countryCode === 'US';
+  const locationName = hasViewerCity ? getViewerLocationName(viewerLocation) : '';
+  const beforeAfterLocationText = locationName ? `${locationName} homes` : 'Maryland and DC homes';
+  return <>
   <section className="original-hero upgraded-hero">
-    <div className="original-hero-copy"><WindStreaks /><h1>A fresher home<br />starts with <span>clean air ducts.</span></h1><p className="lede">Professional air duct, dryer vent, and chimney service for homes that deserve clean, comfortable air.</p><div className="hero-points"><span><Sparkles aria-hidden="true" />Clear next steps.</span><span><Heart aria-hidden="true" />Respectful service.</span><span><MapPin aria-hidden="true" />Local coordination.</span></div><div className="hero-actions"><Link className="button original-primary" to="/booking">Get Free Quote <span>→</span></Link><Link className="hero-secondary" to="/services">Explore services</Link></div></div>
+    <div className="original-hero-copy"><h1>A fresher home<br />starts with <span>clean air ducts.</span></h1><p className="lede">Professional air duct, dryer vent, and chimney service for homes that deserve clean, comfortable air.</p><div className="hero-points"><span><Sparkles aria-hidden="true" />Clear next steps.</span><span><Heart aria-hidden="true" />Respectful service.</span></div><div className="hero-actions"><Link className="button original-primary" to="/services">Explore services <span>→</span></Link></div></div>
+    <div className="hero-availability" id="hero-availability">
+      <aside className="availability-card hero-quote-card" aria-labelledby="hero-quote-title">
+        <div className="availability-heading"><span><CalendarDays aria-hidden="true" /></span><div><strong id="hero-quote-title">Get your free estimate</strong><small>Tell us a bit about your home and we&apos;ll follow up with next steps.</small></div></div>
+        <BookingForm />
+      </aside>
+    </div>
     <figure className="original-hero-image"><img src={familyHero} fetchPriority="high" alt="Family relaxing in a clean, bright living room" /><HeroLocation /></figure>
-    <div className="hero-availability"><AvailabilityCard /></div>
   </section>
   <section className="trust-rail" aria-label="Easy Breezy service promises"><article className="trust-location"><TrustLocation /></article>{trust.map(([Icon, title]) => <article key={title}><Icon aria-hidden="true" /><strong>{title}</strong></article>)}</section>
-  <section className="original-services"><div className="section-top"><h2>How can we help?</h2><p>Simple, respectful service from quote to clean finish.</p></div><div className="service-card-grid">{services.map(([image, title, href]) => <article className="service-card" key={title}><img src={image} alt={title} /><div><h3>{title}</h3><p>Professional cleaning with clear expectations and a straightforward estimate.</p><Link className="text-link" to={href}>Learn more →</Link></div></article>)}</div></section>
-  <section className="results-section"><div className="section-top"><h2>Proof belongs in the work.</h2><p>Our gallery is being prepared with real, approved job photos—never made-up before-and-afters.</p></div><div className="clean-gallery">{cleanGallery.map(([image, title, text]) => <figure key={title}><img src={image} loading="lazy" alt={title} /><figcaption><strong>{title}</strong><span>{text}</span></figcaption></figure>)}</div><div className="real-photo-note"><strong>Real job photos coming soon.</strong><span>We will add clear before-and-after context, service details, and local-area information as approved photos arrive.</span><Link to="/before-after">See how the gallery will work →</Link></div></section>
-  <section className="quote-section"><div className="quote-copy"><p className="quote-kicker">Simple booking. Clear next steps.</p><h2>Ready to make it Easy Breezy?</h2><p>Tell us about your home or business, and we’ll follow up with a clear estimate.</p><ul className="quote-reassurance"><li>Clear pricing before we start</li><li>Respectful service in your home</li><li>A time that works for your schedule</li></ul></div><div className="quote-form"><BookingForm /></div></section>
-  <section className="dark-cta"><div><h2>Dirty ducts? Easy Breezy.</h2><p>Book the service that makes your home feel easier.</p></div><div className="cta-details"><span><CalendarDays /> Easy online booking</span></div><Link className="button light" to="/booking">Book service <span>→</span></Link></section>
+  <section className="original-services"><div className="section-top"><h2>How can we help?</h2><p>Simple, respectful service from quote to clean finish.</p></div><div className="service-card-grid">{services.map(([image, title, href, blurb]) => <article className="service-card" key={title}><img src={image} alt={title} /><div><h3>{title}</h3><p>{blurb}</p><Link className="text-link" to={href}>Learn more →</Link></div></article>)}</div></section>
+  <section className="results-section">
+    <div className="results-intro">
+      <div className="section-top"><h2>Real jobs, real before &amp; after.</h2><p>No stock photography and no staged photos — this is our actual work in {beforeAfterLocationText}.</p></div>
+      <figure className="crew-photo"><img src={workerWithLogo} loading="lazy" alt="Easy Breezy technician cutting in a new duct access point, wearing the Easy Breezy logo" /><figcaption>Improving your home's air quality, one job at a time.</figcaption></figure>
+    </div>
+    <div className="before-after-grid">{beforeAfterPairs.map(([before, after, title, text]) => <article className="before-after-pair" key={title}>
+      <div className="before-after-images">
+        <figure><img src={before} loading="lazy" alt={`${title} — before`} /><span className="ba-tag ba-before">Before</span></figure>
+        <figure><img src={after} loading="lazy" alt={`${title} — after`} /><span className="ba-tag ba-after">After</span></figure>
+      </div>
+      <div className="before-after-caption"><strong>{title}</strong><span>{text}</span></div>
+    </article>)}</div>
+  </section>
+  <section className="dark-cta"><div><h2>Dirty ducts? Easy Breezy.</h2><p>Book the service that makes your home feel easier.</p></div><div className="cta-details"><span><CalendarDays /> Easy online booking</span></div><a className="button light" href="#hero-availability">Get your free estimate <span>→</span></a></section>
 </>; }

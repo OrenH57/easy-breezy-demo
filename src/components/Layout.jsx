@@ -3,9 +3,10 @@ import { Menu, Phone } from 'lucide-react';
 import { useState } from 'react';
 import { Brand } from './Brand';
 import { HelperAgent } from './HelperAgent';
+import { PageLeaves } from './PageLeaves';
 import { getViewerLocationName, useViewerLocation } from '../hooks/useViewerLocation';
 
-const nav = [['/services', 'Services'], ['/pricing', 'Pricing'], ['/before-after', 'Results'], ['/service-areas', 'Service Areas']];
+const nav = [['/services', 'Services'], ['/pricing', 'Pricing'], ['/service-areas', 'Service Areas']];
 
 export function Layout({ children }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -16,6 +17,7 @@ export function Layout({ children }) {
   const utilityText = hasViewerCity ? `Air duct, dryer vent & chimney services across ${locationName}` : 'Air duct, dryer vent & chimney services across Maryland and Washington, DC';
   const footerText = hasViewerCity ? `Professional air duct, dryer vent and chimney cleaning for ${locationName}.` : 'Professional air duct, dryer vent and chimney cleaning for Maryland and Washington, DC.';
   return <>
+    <PageLeaves />
     <div className="utility" aria-live="polite">{utilityText}</div>
     <header>
       <Link to="/" className="logo" aria-label="Easy Breezy home"><Brand /></Link>
@@ -25,6 +27,6 @@ export function Layout({ children }) {
     {menuOpen && <nav className="mobile-nav" aria-label="Mobile navigation">{nav.map(([to, label]) => <NavLink key={to} to={to} onClick={closeMenu}>{label}</NavLink>)}<Link className="mobile-phone" to="/booking" onClick={closeMenu}><Phone /> Request a call</Link></nav>}
     {children}
     <HelperAgent />
-    <footer><Brand /><p aria-live="polite">{footerText}</p><div><Link to="/services">Services</Link><Link to="/pricing">Pricing</Link><Link to="/service-areas">Service areas</Link><Link to="/admin">Owner sign in</Link></div></footer>
+    <footer><Brand /><p aria-live="polite">{footerText}</p><div><Link to="/services">Services</Link><Link to="/pricing">Pricing</Link><Link to="/service-areas">Service areas</Link><a href="mailto:hello@easybreezyservices.com">hello@easybreezyservices.com</a><Link to="/admin">Owner sign in</Link></div></footer>
   </>;
 }

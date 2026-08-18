@@ -38,6 +38,7 @@
     grid-area: image;
     align-self: stretch;
     min-height: 485px;
+    max-height: 620px;
     height: 100%;
     overflow: hidden;
     border-radius: 0;
@@ -238,7 +239,7 @@ footer .brand { filter: none; }
 }
 @media (max-width: 650px) {
   .original-hero-image::before {
-    background: linear-gradient(180deg, #fff 0%, rgba(255,255,255,.5) 5%, rgba(255,255,255,0) 14%);
+    background: linear-gradient(180deg, #f5f2ff 0%, rgba(245,242,255,.5) 5%, rgba(245,242,255,0) 14%);
   }
 }
 
@@ -400,6 +401,14 @@ footer > div:last-child { flex-wrap: wrap; row-gap: 8px; }
 @media (max-width: 800px) {
   .before-after-grid { grid-template-columns: 1fr; }
 }
+/* On mobile, lead with the dryer-vent fire-risk story ahead of the chimney
+   chase pair — keeps DOM order (and its SEO/reading order) unchanged, just
+   the visual stacking order. */
+@media (max-width: 650px) {
+  .before-after-pair:nth-child(1) { order: 2; }
+  .before-after-pair:nth-child(2) { order: 1; }
+  .before-after-pair:nth-child(3) { order: 3; }
+}
 @media (max-width: 650px) {
   .results-intro { padding: 0 20px; margin-bottom: 24px; }
   .before-after-grid { padding: 0 20px; gap: 16px; }
@@ -445,10 +454,32 @@ footer > div:last-child { flex-wrap: wrap; row-gap: 8px; }
 }
 
 /* On mobile the hero stacks headline, form, then photo (instead of sitting
-   beside the photo like on desktop), so the headline/lede block reads as a
-   large flat white slab with nothing to anchor it. Tint just that block —
-   not the whole hero — so the photo's white blend gradient underneath it
-   still fades against a matching white background. */
+   beside the photo like on desktop), so everything before the photo reads
+   as one long flat white slab. Tint the whole pre-photo block as a single
+   panel — headline and form both included — instead of just the headline,
+   so there's no white gap between them; the photo's blend gradient above
+   is updated to match this color instead of hardcoded white so the photo
+   still emerges from it cleanly rather than showing a mismatched seam. */
 @media (max-width: 650px) {
-  .original-hero-copy { background: #f5f2ff; }
+  .original-hero { background: #f5f2ff !important; }
+}
+
+/* Typography/spacing pass for every non-home page (Services, Pricing, the
+   individual service pages, Service Areas, Booking, About) — body copy was
+   noticeably smaller than the homepage's and the pages felt sparse. */
+.lede { font-size: 19px !important; line-height: 1.7 !important; color: #465779; }
+.services-note { font-size: 16px !important; line-height: 1.75 !important; }
+.seo-copy p { font-size: 16px; line-height: 1.75; }
+.seo-copy h2 { font-size: clamp(24px, 2.6vw, 30px); }
+.about .story p { font-size: 17px; line-height: 1.75; margin-bottom: 18px; }
+.about .story p:last-child { margin-bottom: 0; }
+.page > .eyebrow, .booking-page .eyebrow { font-size: 12px; letter-spacing: .14em; }
+.page h1, .booking-page h1 { line-height: 1.05; }
+.contact-rail p { font-size: 14px; line-height: 1.6; }
+
+@media (min-width: 651px) {
+  .page, .booking-page { padding: 96px 0; }
+  .seo-copy { padding: 44px 48px; }
+  .about-layout { gap: 84px; }
+  .services-intro { gap: 72px; }
 }

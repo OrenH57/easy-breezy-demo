@@ -6,7 +6,7 @@ import { HelperAgent } from './HelperAgent';
 import { PageLeaves } from './PageLeaves';
 import { getViewerLocationName, useViewerLocation } from '../hooks/useViewerLocation';
 
-const nav = [['/services', 'Services'], ['/pricing', 'Pricing'], ['/service-areas', 'Service Areas']];
+const nav = [['/services', 'Services'], ['/pricing', 'Pricing']];
 
 export function Layout({ children }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -27,6 +27,6 @@ export function Layout({ children }) {
     {menuOpen && <nav className="mobile-nav" aria-label="Mobile navigation">{nav.map(([to, label]) => <NavLink key={to} to={to} onClick={closeMenu}>{label}</NavLink>)}<Link className="mobile-phone" to="/booking" onClick={closeMenu}><Phone /> Request a call</Link></nav>}
     {children}
     <HelperAgent />
-    <footer><Brand /><p aria-live="polite">{footerText}</p><div><Link to="/services">Services</Link><Link to="/pricing">Pricing</Link><Link to="/service-areas">Service areas</Link><a href="mailto:hello@easybreezyservices.com">hello@easybreezyservices.com</a><Link to="/admin">Owner sign in</Link></div></footer>
+    <footer><Brand /><p aria-live="polite">{footerText}</p><div><Link to="/services">Services</Link><Link to="/pricing">Pricing</Link><a href="mailto:hello@easybreezyservices.com">hello@easybreezyservices.com</a><Link to="/admin">Owner sign in</Link></div></footer>
   </>;
 }

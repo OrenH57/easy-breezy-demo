@@ -75,9 +75,15 @@
   .service-card-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; margin-top: 28px; }
   .service-card { overflow: hidden; border-radius: 18px; }
   .service-card img { height: 182px; }
-  .service-card div { padding: 20px; }
-  .service-card h3 { min-height: 38px; margin-bottom: 8px; }
-  .service-card p { min-height: 80px; }
+  /* The fixed min-heights below reserved room for the longest blurb in the
+     grid, but grid rows stretch every card to match the tallest anyway —
+     so shorter blurbs left a dead gap between the text and "Learn more".
+     A flex column with the link pinned to the bottom (margin-top: auto)
+     keeps cards the same height without that empty middle gap. */
+  .service-card div { display: flex; flex-direction: column; height: 100%; padding: 20px; }
+  .service-card h3 { margin-bottom: 8px; }
+  .service-card p { margin-bottom: 15px; }
+  .service-card .text-link { margin-top: auto; }
 
   .results-section { padding: 72px var(--desktop-gutter) !important; }
   .results-section .section-top { display: block; max-width: 1180px; margin-bottom: 30px !important; }
@@ -189,6 +195,14 @@ header .phone-link { color: #111630 !important; }
 header nav a:hover,
 header nav a.active { color: #6037d7 !important; border-color: #7c55e7 !important; }
 header .header-book { background: #6845e7 !important; }
+
+/* With only two nav links left, `justify-content: space-between` on the
+   header left them stranded near the middle instead of grouped with the
+   call-to-action buttons. Push the whole nav+actions cluster to the right,
+   keeping just the logo pinned left. */
+@media (min-width: 651px) {
+  header nav[aria-label='Main navigation'] { margin-left: auto; margin-right: 8px; }
+}
 
 footer {
   color: #15244a;
@@ -389,7 +403,7 @@ footer > div:last-child { flex-wrap: wrap; row-gap: 8px; }
    Flex (not grid) so the short text column doesn't get stretched to match the taller photo,
    which was leaving a big block of dead space around it. */
 .results-intro { max-width: 1180px; margin: 0 auto 34px; display: flex; align-items: stretch; gap: 40px; }
-.results-intro .section-top { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: stretch; justify-content: space-between; margin: 0; padding: 4px 0; text-align: left; }
+.results-intro .section-top { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: stretch; justify-content: center; margin: 0; padding: 4px 0; text-align: left; }
 .results-intro .section-top p { font-size: 17px; line-height: 1.7; max-width: 46ch; }
 .results-intro .crew-photo { flex: 0 0 auto; width: min(420px, 42%); }
 .crew-photo { position: relative; margin: 0; height: 380px; border-radius: 16px; overflow: hidden; box-shadow: 0 14px 34px rgba(21, 36, 74, .14); }
@@ -506,7 +520,26 @@ footer > div:last-child { flex-wrap: wrap; row-gap: 8px; }
   .services-intro { gap: 72px; }
 }
 
-.results-trust-note { max-width: 1180px; margin: 24px auto 0; padding: 0 20px; text-align: center; }
-@media (min-width: 651px) {
-  .results-trust-note { padding: 0; }
+/* Sits inside .section-top now, right under the intro paragraph, so it
+   fills the column next to the crew photo instead of leaving that column
+   short and centered against a much taller image. */
+.results-trust-note { margin: 14px 0 0; font-size: 14px; }
+
+/* Font fixes: text driven by dynamic/personalized content (the visitor's
+   detected city, the service-area map caption) was rendering in stale fonts
+   left over from earlier design passes ('Plus Jakarta Sans', 'Playfair
+   Display') instead of the site's actual Nunito/Fredoka pairing. In both
+   cases a more specific selector than the general brand-font rule was
+   winning the cascade — fixing that directly rather than papering over it. */
+.trust-rail article strong,
+.trust-rail-intro strong {
+  font-family: 'Easy Breezy Nunito', Arial, sans-serif !important;
+}
+.service-area-map .sam-caption h3 {
+  font-family: 'Easy Breezy Fredoka', Arial, sans-serif !important;
+  font-weight: 600;
+  letter-spacing: -.02em;
+}
+.service-area-map .sam-caption p {
+  font-family: 'Easy Breezy Nunito', Arial, sans-serif;
 }

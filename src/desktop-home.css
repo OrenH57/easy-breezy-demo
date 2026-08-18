@@ -38,7 +38,6 @@
     grid-area: image;
     align-self: stretch;
     min-height: 485px;
-    max-height: 620px;
     height: 100%;
     overflow: hidden;
     border-radius: 0;
@@ -245,7 +244,7 @@ footer .brand { filter: none; }
 
 /* The new hero photo has its mascot/wind graphic positioned toward the right
    edge — bias the crop right (and slightly up) so it's never cut off. */
-.original-hero-image > img { object-position: 82% 28% !important; }
+.original-hero-image > img { object-position: 96% top !important; }
 @media (max-width: 650px) {
   .original-hero-image > img { object-position: 78% 22% !important; }
 }

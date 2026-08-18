@@ -1,5 +1,5 @@
 import { ArrowRight, Send, X } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import helperAgent from '../assets/easy-breezy-helper-agent.webp';
 import { api, ApiError } from '../lib/api';
@@ -17,6 +17,11 @@ export function HelperAgent() {
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
   const [chatError, setChatError] = useState('');
+  const chatLogRef = useRef(null);
+  useEffect(() => {
+    const log = chatLogRef.current;
+    if (log) log.scrollTo({ top: log.scrollHeight, behavior: 'smooth' });
+  }, [messages, sending]);
   const close = () => { setIsOpen(false); setNeed(''); setMessages([]); setDraft(''); setChatError(''); };
   const canContinueBooking = Boolean(need && location.pathname === '/booking');
   const continueBooking = () => {
@@ -50,7 +55,7 @@ export function HelperAgent() {
   }
   return <aside className="eb-helper" aria-label="Easy Breezy service guide">
     {isOpen ? <div className="helper-card"><div className="helper-heading"><div className="helper-avatar"><img src={helperAgent} alt="Maya from Easy Breezy" /></div><div><p className="helper-title">Chat with Maya</p><p className="helper-byline">Our AI assistant — here to help you find the right service.</p></div><button className="helper-close" type="button" aria-label="Close Easy Breezy helper" onClick={close}><X aria-hidden="true" /></button></div>
-      <div className="helper-chat-log" role="log" aria-live="polite">
+      <div className="helper-chat-log" role="log" aria-live="polite" ref={chatLogRef}>
         <p className="helper-chat-turn helper-chat-assistant">{greeting}</p>
         {messages.map((turn, index) => <p key={index} className={`helper-chat-turn helper-chat-${turn.role}`}>{turn.content}</p>)}
         {sending && <p className="helper-chat-turn helper-chat-assistant helper-chat-pending">Maya is typing…</p>}

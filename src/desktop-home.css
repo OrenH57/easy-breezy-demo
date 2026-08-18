@@ -267,8 +267,8 @@ footer .brand { filter: none; }
    Positioned absolute against #root (not fixed against the viewport) so they
    scroll with the page instead of hovering in place. */
 #root { position: relative; }
-.page-leaves { position: absolute; inset: 0; min-height: 100%; overflow: hidden; pointer-events: none; }
-.page-leaf { position: absolute; width: 9px; height: 9px; background: #6da85c; border-radius: 0 100% 0 100%; opacity: .5; }
+.page-leaves { position: absolute; inset: 0; z-index: -1; min-height: 100%; overflow: hidden; pointer-events: none; }
+.page-leaf { position: absolute; width: clamp(18px, 2.2vw, 40px); height: clamp(12px, 1.4vw, 26px); background: #6da85c; border-radius: 0 100% 0 100%; opacity: .5; }
 .page-leaf:nth-child(1) { left: 6%; top: 10%; }
 .page-leaf:nth-child(2) { left: 18%; top: 32%; }
 .page-leaf:nth-child(3) { left: 32%; top: 58%; }

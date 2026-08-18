@@ -145,21 +145,87 @@ const mayaSystemPrompt = [
   'How to run the conversation:',
   '1. If it is not already obvious, ask one short, natural question to understand what is going on (e.g. what they are noticing, and whether it is a home or business).',
   '2. Match what they describe to the right service and briefly explain why it matters, in plain language, using the facts above.',
-  '3. Once you have a sense of what they need, invite them to request their free estimate — mention it takes under a minute and there is no obligation.',
+  '3. Once you have a sense of what they need, invite them to book a free estimate.',
   '4. If asked something outside these facts (exact price, exact appointment times, guarantees, service outside MD/DC), be honest that you cannot promise that from chat and point them to requesting an estimate or calling, rather than guessing.',
+  '5. Never ask the visitor what city, state, or area they are in. Their service area is detected automatically from their connection, not from anything they tell you.',
   '',
-  'Style: warm, direct, plain language, no corporate jargon, no emojis. Keep replies to 2-4 sentences. Ask at most one question per reply. Never fabricate prices, availability, timelines, or guarantees not listed above.',
+  'Booking an appointment: once the visitor agrees to book, collect these one at a time, asking for only one missing piece of information per reply: full name, phone number, which service, and their preferred date (they can say "flexible"). Do not call the book_appointment tool until you have all of them. Once you have everything, call book_appointment. The visitor\'s service area is supplied automatically — if the tool reports their location is outside our service area, tell them so in one short sentence and suggest they call instead; otherwise confirm the booking in one short sentence.',
+  '',
+  'Style: warm, direct, plain language, no corporate jargon, no emojis. Keep every reply to at most 2 sentences. Ask at most one question per reply. Never fabricate prices, availability, timelines, or guarantees not listed above.',
 ].join('\n');
-async function askMaya(message, history) {
+
+const mayaTools = [{
+  type: 'function',
+  function: {
+    name: 'book_appointment',
+    description: 'Book a free estimate appointment once the visitor has agreed to book and every required field has been collected in conversation. Their service area is detected automatically from their connection — do not ask for it.',
+    parameters: {
+      type: 'object',
+      properties: {
+        name: { type: 'string', description: "Visitor's full name." },
+        phone: { type: 'string', description: "Visitor's phone number." },
+        service: { type: 'string', description: 'The service being requested, e.g. "Air duct cleaning".' },
+        preferredDate: { type: 'string', description: 'Preferred date for the appointment, or "flexible" if the visitor has no preference.' },
+        email: { type: 'string', description: "Visitor's email address, if they gave one." },
+        notes: { type: 'string', description: 'Any other relevant detail the visitor mentioned.' },
+      },
+      required: ['name', 'phone', 'service', 'preferredDate'],
+    },
+  },
+}];
+
+function bookAppointmentFromMaya(args, stateCode) {
+  const state = serviceState(stateCode);
+  if (!state?.enabled) return { ok: false, message: 'We could not confirm this visitor is in our service area from their connection.' };
+  const name = clean(args?.name);
+  const phone = clean(args?.phone);
+  if (!name || !phone) return { ok: false, message: 'A name and phone number are both required.' };
+  const client = { id: id(), requestId: '', stateCode, stateName: state.name, name, phone, email: clean(args?.email), service: clean(args?.service) || 'Air duct cleaning', preferredDate: clean(args?.preferredDate), notes: clean(args?.notes), createdAt: new Date().toISOString() };
+  db.clients.push(client);
+  save();
+  notifyOwner(`New lead: ${client.name}`, [`Name: ${client.name}`, `Phone: ${client.phone}`, `Email: ${client.email}`, `Service: ${client.service}`, `State: ${client.stateName}`, `Preferred date: ${client.preferredDate}`, `Notes: ${client.notes}`]);
+  return { ok: true, message: 'Appointment request booked.' };
+}
+
+async function viewerStateCode(req) {
+  const address = viewerAddress(req);
+  if (!isPublicAddress(address)) return null;
+  const location = await locationFromProvider(address);
+  const code = String(location?.regionCode || '').toLowerCase();
+  return serviceState(code)?.enabled ? code : null;
+}
+
+async function callOpenAi(messages, controller) {
+  const response = await fetch('https://api.openai.com/v1/chat/completions', { method: 'POST', signal: controller.signal, headers: { Authorization: `Bearer ${config.openaiKey}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ model: 'gpt-4o-mini', messages, tools: mayaTools, temperature: 0.5, max_tokens: 260 }) });
+  if (!response.ok) { const error = Error('Maya is temporarily unavailable. Please try again shortly.'); error.status = 502; throw error; }
+  return response.json();
+}
+
+async function askMaya(message, history, stateCode) {
   if (!config.openaiKey) { const error = Error('Maya is not configured yet. Set OPENAI_API_KEY before enabling the assistant.'); error.status = 503; throw error; }
   const safeHistory = Array.isArray(history) ? history.slice(-8).filter((turn) => turn && (turn.role === 'user' || turn.role === 'assistant') && typeof turn.content === 'string').map((turn) => ({ role: turn.role, content: clean(turn.content) })) : [];
   const messages = [{ role: 'system', content: mayaSystemPrompt }, ...safeHistory, { role: 'user', content: clean(message) }];
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 12_000);
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', { method: 'POST', signal: controller.signal, headers: { Authorization: `Bearer ${config.openaiKey}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ model: 'gpt-4o-mini', messages, temperature: 0.5, max_tokens: 260 }) });
-    if (!response.ok) { const error = Error('Maya is temporarily unavailable. Please try again shortly.'); error.status = 502; throw error; }
-    const data = await response.json();
+    let data = await callOpenAi(messages, controller);
+    let toolCalls = data?.choices?.[0]?.message?.tool_calls;
+    let rounds = 0;
+    while (Array.isArray(toolCalls) && toolCalls.length && rounds < 3) {
+      messages.push(data.choices[0].message);
+      for (const call of toolCalls) {
+        let result = { ok: false, message: 'Unknown tool.' };
+        if (call.function?.name === 'book_appointment') {
+          let args = {};
+          try { args = JSON.parse(call.function.arguments || '{}'); } catch { args = {}; }
+          result = bookAppointmentFromMaya(args, stateCode);
+        }
+        messages.push({ role: 'tool', tool_call_id: call.id, content: JSON.stringify(result) });
+      }
+      data = await callOpenAi(messages, controller);
+      toolCalls = data?.choices?.[0]?.message?.tool_calls;
+      rounds += 1;
+    }
     const reply = data?.choices?.[0]?.message?.content?.trim();
     if (!reply) { const error = Error('Maya is temporarily unavailable. Please try again shortly.'); error.status = 502; throw error; }
     return reply;
@@ -173,8 +239,8 @@ const server = http.createServer(async (req, res) => {
   try {
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-    res.setHeader('Content-Security-Policy', "default-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; img-src 'self' data:; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'");
+    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(self)');
+    res.setHeader('Content-Security-Policy', "default-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; img-src 'self' data:; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://api.bigdatacloud.net");
     res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
     res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
     if (isProduction) res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
@@ -221,7 +287,8 @@ const server = http.createServer(async (req, res) => {
       if (!config.openaiKey) return json(res, 503, { error: 'Maya is not configured yet. Set OPENAI_API_KEY before enabling the assistant.' });
       const input = await body(req);
       if (!clean(input.message)) return json(res, 400, { error: 'Please include a message.' });
-      const reply = await askMaya(input.message, input.history);
+      const stateCode = await viewerStateCode(req);
+      const reply = await askMaya(input.message, input.history, stateCode);
       return json(res, 200, { reply });
     }
     if (req.method === 'POST' && url.pathname === '/api/admin/login') { if (!config.adminPassword) return json(res, 503, { error: 'Owner access is not configured yet. Set ADMIN_PASSWORD before signing in.' }); if (!loginAllowed(req)) return json(res, 429, { error: 'Too many attempts. Please wait 15 minutes, then try again.' }); const input = await body(req); if (!crypto.timingSafeEqual(passwordHash(clean(input.password)), passwordHash(config.adminPassword))) { recordFailedLogin(req); return json(res, 401, { error: 'We could not sign you in. Check your password and try again.' }); } clearFailedLogins(req); const token = id(); sessions.set(token, Date.now() + sessionLifetime); res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'Set-Cookie': sessionCookie(token), 'X-Content-Type-Options': 'nosniff' }); return res.end('{"ok":true}'); }

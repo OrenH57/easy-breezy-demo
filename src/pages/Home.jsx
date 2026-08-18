@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { BadgeCheck, CalendarDays, CircleDollarSign, Heart, Sparkles } from 'lucide-react';
-import familyHero from '../assets/easy-breezy-family-hero-final.webp';
+import familyHero from '../assets/easy-breezy-family-hero-v2.webp';
 import residentialImage from '../assets/service/easy-breezy-duct-technician.webp';
 import dryerImage from '../assets/service/easy-breezy-dryer-technician.webp';
 import chimneyImage from '../assets/service/easy-breezy-chimney-technician.webp';
@@ -27,10 +27,10 @@ const services = [
   [commercialImage, 'Commercial Duct Cleaning', '/commercial-air-duct-cleaning/', "Poor air quality sends employees home sick and drives up energy costs. We work around your hours so operations never stop."],
 ];
 const beforeAfterPairs = [
-  [chimneyCapBefore1, chimneyCapAfter2, 'Chimney cap, replaced', 'Rusted-through mesh cap swapped for a new stainless cap — keeps rain and animals out for good.'],
-  [chimneyCapBefore2, chimneyCapAfter1, 'Chimney chase top, restored', 'Corroded flashing on the chase cover fully replaced instead of patched over.'],
-  [dryerVentBefore, dryerVentAfter, 'Dryer vent, cleared', 'Years of lint and cobwebs pulled from the line — this is a real fire-risk reduction, not just a tidy-up.'],
-  [ductBefore, ductAfter, 'Supply duct, cleaned out', 'Built-up dust cleared from the run so air can actually move through it again.'],
+  [chimneyCapBefore1, chimneyCapAfter2, 'No more rain or pests getting in', 'That rusted-through cap was a wide-open invitation for water damage and animals. Sealed for good with a new stainless cap.'],
+  [chimneyCapBefore2, chimneyCapAfter1, 'One less way for water to get in', 'Corroded flashing meant water was working its way into the chase. A full replacement — not a patch — closes that off.'],
+  [dryerVentBefore, dryerVentAfter, 'A real fire risk, removed', 'Years of trapped lint made this a fire hazard waiting to happen. Clear now, and the dryer runs like new.'],
+  [ductBefore, ductAfter, 'Air can finally move again', 'Built-up dust was choking this line. Cleared out, so conditioned air actually reaches the room it was meant for.', 'center 32%'],
 ];
 
 export default function Home() {
@@ -56,9 +56,9 @@ export default function Home() {
       <div className="section-top"><h2>Real jobs, real before &amp; after.</h2><p>No stock photography and no staged photos — this is our actual work in {beforeAfterLocationText}.</p></div>
       <figure className="crew-photo"><img src={workerWithLogo} loading="lazy" alt="Easy Breezy technician cutting in a new duct access point, wearing the Easy Breezy logo" /><figcaption>Improving your home's air quality, one job at a time.</figcaption></figure>
     </div>
-    <div className="before-after-grid">{beforeAfterPairs.map(([before, after, title, text]) => <article className="before-after-pair" key={title}>
+    <div className="before-after-grid">{beforeAfterPairs.map(([before, after, title, text, beforePosition]) => <article className="before-after-pair" key={title}>
       <div className="before-after-images">
-        <figure><img src={before} loading="lazy" alt={`${title} — before`} /><span className="ba-tag ba-before">Before</span></figure>
+        <figure><img src={before} loading="lazy" alt={`${title} — before`} style={beforePosition ? { objectPosition: beforePosition } : undefined} /><span className="ba-tag ba-before">Before</span></figure>
         <figure><img src={after} loading="lazy" alt={`${title} — after`} /><span className="ba-tag ba-after">After</span></figure>
       </div>
       <div className="before-after-caption"><strong>{title}</strong><span>{text}</span></div>

@@ -17,11 +17,47 @@ async function getLocationFromServer(signal) {
   }
 }
 
+// GPS/Wi-Fi based position is far more precise than an IP lookup (meters vs.
+// city-level), but requires the visitor to grant the browser permission
+// prompt, so it's tried first and the IP lookup is kept as the fallback.
+function getGpsPosition(timeoutMs = 8000) {
+  return new Promise((resolve) => {
+    if (!('geolocation' in navigator)) return resolve(null);
+    navigator.geolocation.getCurrentPosition(
+      (position) => resolve(position.coords),
+      () => resolve(null),
+      { enableHighAccuracy: false, timeout: timeoutMs, maximumAge: 5 * 60 * 1000 },
+    );
+  });
+}
+
+async function getLocationFromGps(signal) {
+  const coords = await getGpsPosition();
+  if (!coords) return null;
+  try {
+    const url = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${coords.latitude}&longitude=${coords.longitude}&localityLanguage=en`;
+    const response = await fetch(url, { signal, cache: 'no-store' });
+    if (!response.ok) return null;
+    const data = await response.json();
+    return normalizeLocation({
+      city: data.city || data.locality,
+      region: data.principalSubdivision,
+      regionCode: String(data.principalSubdivisionCode || '').split('-').pop(),
+      countryCode: data.countryCode,
+      latitude: coords.latitude,
+      longitude: coords.longitude,
+    });
+  } catch {
+    return null;
+  }
+}
+
 function loadViewerLocation() {
   if (!viewerLocationRequest) {
     const controller = new AbortController();
-    const timeout = window.setTimeout(() => controller.abort(), 4500);
-    viewerLocationRequest = getLocationFromServer(controller.signal)
+    const timeout = window.setTimeout(() => controller.abort(), 12_000);
+    viewerLocationRequest = getLocationFromGps(controller.signal)
+      .then((gpsLocation) => gpsLocation || getLocationFromServer(controller.signal))
       .finally(() => {
         window.clearTimeout(timeout);
         viewerLocationRequest = undefined;

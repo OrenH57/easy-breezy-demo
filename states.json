@@ -5,6 +5,12 @@
     "enabled": true,
     "serviceAreas": ["Baltimore", "Annapolis", "Columbia", "Rockville"]
   },
+  "dc": {
+    "name": "Washington, DC",
+    "phone": "",
+    "enabled": true,
+    "serviceAreas": ["Georgetown", "Capitol Hill", "Dupont Circle", "Navy Yard"]
+  },
   "nj": {
     "name": "New Jersey",
     "phone": "",

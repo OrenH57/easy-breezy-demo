@@ -43,4 +43,3 @@ export async function retryRequest(request, { retries = 3, onRetry } = {}) {
     }
   }
 }
-export const stateCode=location.pathname.split('/')[1]?.match(/^[a-z]{2}$/i)?location.pathname.split('/')[1].toLowerCase():'md';

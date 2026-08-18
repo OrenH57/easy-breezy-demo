@@ -8,7 +8,6 @@ const root = __dirname;
 const distDir = path.join(root, 'dist');
 const dataDir = process.env.DATA_DIR || path.join(root, 'data');
 const dbFile = path.join(dataDir, 'business.json');
-const statesFile = path.join(root, 'states.json');
 fs.mkdirSync(dataDir, { recursive: true });
 
 const config = {
@@ -35,8 +34,6 @@ const publicWriteWindow = 15 * 60 * 1000;
 const maxPublicWrites = 10;
 const locationCacheLifetime = 6 * 60 * 60 * 1000;
 const save = () => fs.writeFileSync(dbFile, JSON.stringify(db, null, 2));
-const states = () => JSON.parse(fs.readFileSync(statesFile, 'utf8'));
-const serviceState = (code) => states()[String(code || 'md').toLowerCase()];
 const id = () => crypto.randomUUID();
 const date = (d) => new Date(d).toISOString().slice(0, 10);
 const plusYear = (d) => { const value = new Date(d || Date.now()); value.setFullYear(value.getFullYear() + 1); return date(value); };
@@ -124,7 +121,7 @@ async function notifyOwner(subject, lines) {
 }
 
 const mayaSystemPrompt = [
-  'You are Maya, the on-site sales and support assistant for Easy Breezy Air Duct and Chimney Services, a home-services company serving homeowners and businesses across Maryland and Washington, DC.',
+  'You are Maya, the on-site sales and support assistant for Easy Breezy Air Duct and Chimney Services, a home-services company serving homeowners and businesses wherever they are located.',
   '',
   'Your job: help visitors quickly figure out which service fits their situation, answer their questions using only the facts below, build enough confidence that they submit the estimate request form, and do it in a way that feels like a genuinely helpful local expert, not a pushy salesperson.',
   '',
@@ -140,16 +137,16 @@ const mayaSystemPrompt = [
   '- Estimates are always free and given before any work begins.',
   '- The price depends on system size / number of vents, how easy the system is to access, its current condition, and any add-ons requested.',
   '- No hidden fees; if anything changes once work starts, the customer is told and approves it before extra charges apply.',
-  '- Easy Breezy serves homeowners and businesses across Maryland and Washington, DC.',
+  '- Easy Breezy serves homeowners and businesses wherever they are located.',
   '',
   'How to run the conversation:',
   '1. If it is not already obvious, ask one short, natural question to understand what is going on (e.g. what they are noticing, and whether it is a home or business).',
   '2. Match what they describe to the right service and briefly explain why it matters, in plain language, using the facts above.',
   '3. Once you have a sense of what they need, invite them to book a free estimate.',
-  '4. If asked something outside these facts (exact price, exact appointment times, guarantees, service outside MD/DC), be honest that you cannot promise that from chat and point them to requesting an estimate or calling, rather than guessing.',
-  '5. Never ask the visitor what city, state, or area they are in. Their service area is detected automatically from their connection, not from anything they tell you.',
+  '4. If asked something outside these facts (exact price, exact appointment times, guarantees), be honest that you cannot promise that from chat and point them to requesting an estimate or calling, rather than guessing.',
+  '5. Never ask the visitor what city, state, or area they are in. Their location is detected automatically from their connection, not from anything they tell you.',
   '',
-  'Booking an appointment: once the visitor agrees to book, collect these one at a time, asking for only one missing piece of information per reply: full name, phone number, which service, and their preferred date (they can say "flexible"). Do not call the book_appointment tool until you have all of them. Once you have everything, call book_appointment. The visitor\'s service area is supplied automatically — if the tool reports their location is outside our service area, tell them so in one short sentence and suggest they call instead; otherwise confirm the booking in one short sentence.',
+  'Booking an appointment: once the visitor agrees to book, collect these one at a time, asking for only one missing piece of information per reply: full name, phone number, which service, and their preferred date (they can say "flexible"). Do not call the book_appointment tool until you have all of them. Once you have everything, call book_appointment. The visitor\'s location is supplied automatically — confirm the booking in one short sentence.',
   '',
   'Style: warm, direct, plain language, no corporate jargon, no emojis. Keep every reply to at most 2 sentences. Ask at most one question per reply. Never fabricate prices, availability, timelines, or guarantees not listed above.',
 ].join('\n');
@@ -158,7 +155,7 @@ const mayaTools = [{
   type: 'function',
   function: {
     name: 'book_appointment',
-    description: 'Book a free estimate appointment once the visitor has agreed to book and every required field has been collected in conversation. Their service area is detected automatically from their connection — do not ask for it.',
+    description: 'Book a free estimate appointment once the visitor has agreed to book and every required field has been collected in conversation. Their location is detected automatically from their connection — do not ask for it.',
     parameters: {
       type: 'object',
       properties: {
@@ -174,25 +171,22 @@ const mayaTools = [{
   },
 }];
 
-function bookAppointmentFromMaya(args, stateCode) {
-  const state = serviceState(stateCode);
-  if (!state?.enabled) return { ok: false, message: 'We could not confirm this visitor is in our service area from their connection.' };
+function bookAppointmentFromMaya(args, region) {
   const name = clean(args?.name);
   const phone = clean(args?.phone);
   if (!name || !phone) return { ok: false, message: 'A name and phone number are both required.' };
-  const client = { id: id(), requestId: '', stateCode, stateName: state.name, name, phone, email: clean(args?.email), service: clean(args?.service) || 'Air duct cleaning', preferredDate: clean(args?.preferredDate), notes: clean(args?.notes), createdAt: new Date().toISOString() };
+  const client = { id: id(), requestId: '', stateCode: region?.regionCode || '', stateName: region?.region || '', name, phone, email: clean(args?.email), service: clean(args?.service) || 'Air duct cleaning', preferredDate: clean(args?.preferredDate), notes: clean(args?.notes), createdAt: new Date().toISOString() };
   db.clients.push(client);
   save();
   notifyOwner(`New lead: ${client.name}`, [`Name: ${client.name}`, `Phone: ${client.phone}`, `Email: ${client.email}`, `Service: ${client.service}`, `State: ${client.stateName}`, `Preferred date: ${client.preferredDate}`, `Notes: ${client.notes}`]);
   return { ok: true, message: 'Appointment request booked.' };
 }
 
-async function viewerStateCode(req) {
+async function viewerRegion(req) {
   const address = viewerAddress(req);
   if (!isPublicAddress(address)) return null;
   const location = await locationFromProvider(address);
-  const code = String(location?.regionCode || '').toLowerCase();
-  return serviceState(code)?.enabled ? code : null;
+  return location ? { regionCode: location.regionCode || '', region: location.region || '' } : null;
 }
 
 async function callOpenAi(messages, controller) {
@@ -201,7 +195,7 @@ async function callOpenAi(messages, controller) {
   return response.json();
 }
 
-async function askMaya(message, history, stateCode) {
+async function askMaya(message, history, region) {
   if (!config.openaiKey) { const error = Error('Maya is not configured yet. Set OPENAI_API_KEY before enabling the assistant.'); error.status = 503; throw error; }
   const safeHistory = Array.isArray(history) ? history.slice(-8).filter((turn) => turn && (turn.role === 'user' || turn.role === 'assistant') && typeof turn.content === 'string').map((turn) => ({ role: turn.role, content: clean(turn.content) })) : [];
   const messages = [{ role: 'system', content: mayaSystemPrompt }, ...safeHistory, { role: 'user', content: clean(message) }];
@@ -218,7 +212,7 @@ async function askMaya(message, history, stateCode) {
         if (call.function?.name === 'book_appointment') {
           let args = {};
           try { args = JSON.parse(call.function.arguments || '{}'); } catch { args = {}; }
-          result = bookAppointmentFromMaya(args, stateCode);
+          result = bookAppointmentFromMaya(args, region);
         }
         messages.push({ role: 'tool', tool_call_id: call.id, content: JSON.stringify(result) });
       }
@@ -245,39 +239,35 @@ const server = http.createServer(async (req, res) => {
     res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
     if (isProduction) res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
     const url = new URL(req.url, 'http://localhost');
-    const stateRoute = url.pathname.match(/^\/([a-z]{2})\/?$/);
-    if (req.method === 'GET' && url.pathname === '/api/site') { const state = serviceState(url.searchParams.get('state')); return state?.enabled ? json(res, 200, { name: state.name, phone: config.phone || state.phone, serviceAreas: state.serviceAreas }) : json(res, 404, { error: 'This service area is not live yet.' }); }
+    if (req.method === 'GET' && url.pathname === '/api/site') { return json(res, 200, { name: 'Easy Breezy', phone: config.phone }); }
     if (req.method === 'GET' && url.pathname === '/api/location') {
       const address = viewerAddress(req);
       if (!isPublicAddress(address)) return json(res, 200, { location: null });
       return json(res, 200, { location: await locationFromProvider(address) });
     }
     if (req.method === 'GET' && !url.pathname.startsWith('/api/')) {
-      if (stateRoute && !serviceState(stateRoute[1])?.enabled) return json(res, 404, { error: 'This service area is not live yet.' });
       const requested = path.resolve(distDir, `.${url.pathname}`);
       if (requested.startsWith(distDir) && fs.existsSync(requested) && fs.statSync(requested).isFile()) return sendFile(res, requested);
       return productionPage(res);
     }
     if (req.method === 'POST' && url.pathname === '/api/leads') {
       if (!requestAllowed(req, 'lead', maxPublicWrites, publicWriteWindow)) return json(res, 429, { error: 'Too many requests. Please try again later.' });
-      const input = await body(req); const state = serviceState(input.stateCode);
-      if (!state?.enabled) return json(res, 400, { error: 'This service area is not live yet.' });
+      const input = await body(req);
       if (!clean(input.name) || (!clean(input.phone) && !clean(input.email))) return json(res, 400, { error: 'Please provide your name and either a phone number or email address.' });
       const requestId = clean(req.headers['idempotency-key'] || input.requestId);
       if (requestId && db.clients.some((client) => client.requestId === requestId)) return json(res, 200, { ok: true, duplicate: true });
-      const client = { id: id(), requestId, stateCode: clean(input.stateCode), stateName: state.name, name: clean(input.name), phone: clean(input.phone), email: clean(input.email), service: clean(input.service) || 'Air duct cleaning', preferredDate: clean(input.preferredDate), notes: clean(input.notes), createdAt: new Date().toISOString() };
+      const client = { id: id(), requestId, stateCode: clean(input.stateCode), stateName: clean(input.stateName), name: clean(input.name), phone: clean(input.phone), email: clean(input.email), service: clean(input.service) || 'Air duct cleaning', preferredDate: clean(input.preferredDate), notes: clean(input.notes), createdAt: new Date().toISOString() };
       db.clients.push(client);
-      if (input.reminderConsent === true) db.reminders.push({ id: id(), clientId: client.id, clientName: client.name, stateName: state.name, service: client.service, dueDate: plusYear(client.preferredDate), sentAt: null });
+      if (input.reminderConsent === true) db.reminders.push({ id: id(), clientId: client.id, clientName: client.name, stateName: client.stateName, service: client.service, dueDate: plusYear(client.preferredDate), sentAt: null });
       save();
       notifyOwner(`New lead: ${client.name}`, [`Name: ${client.name}`, `Phone: ${client.phone}`, `Email: ${client.email}`, `Service: ${client.service}`, `State: ${client.stateName}`, `Preferred date: ${client.preferredDate}`, `Notes: ${client.notes}`]);
       return json(res, 201, { ok: true });
     }
     if (req.method === 'POST' && url.pathname === '/api/chat') {
       if (!requestAllowed(req, 'chat', maxPublicWrites, publicWriteWindow)) return json(res, 429, { error: 'Too many requests. Please try again later.' });
-      const input = await body(req); const state = serviceState(input.stateCode);
-      if (!state?.enabled) return json(res, 400, { error: 'This service area is not live yet.' });
+      const input = await body(req);
       if (!clean(input.name) || !clean(input.phone) || !clean(input.message)) return json(res, 400, { error: 'Name, phone, and a message are required.' });
-      const contact = { id: id(), stateCode: clean(input.stateCode), stateName: state.name, name: clean(input.name), phone: clean(input.phone), message: clean(input.message), createdAt: new Date().toISOString() };
+      const contact = { id: id(), stateCode: clean(input.stateCode), stateName: clean(input.stateName), name: clean(input.name), phone: clean(input.phone), message: clean(input.message), createdAt: new Date().toISOString() };
       db.messages.push(contact); save();
       notifyOwner(`New message: ${contact.name}`, [`Name: ${contact.name}`, `Phone: ${contact.phone}`, `State: ${contact.stateName}`, `Message: ${contact.message}`]);
       return json(res, 201, { ok: true });
@@ -287,8 +277,8 @@ const server = http.createServer(async (req, res) => {
       if (!config.openaiKey) return json(res, 503, { error: 'Maya is not configured yet. Set OPENAI_API_KEY before enabling the assistant.' });
       const input = await body(req);
       if (!clean(input.message)) return json(res, 400, { error: 'Please include a message.' });
-      const stateCode = await viewerStateCode(req);
-      const reply = await askMaya(input.message, input.history, stateCode);
+      const region = await viewerRegion(req);
+      const reply = await askMaya(input.message, input.history, region);
       return json(res, 200, { reply });
     }
     if (req.method === 'POST' && url.pathname === '/api/admin/login') { if (!config.adminPassword) return json(res, 503, { error: 'Owner access is not configured yet. Set ADMIN_PASSWORD before signing in.' }); if (!loginAllowed(req)) return json(res, 429, { error: 'Too many attempts. Please wait 15 minutes, then try again.' }); const input = await body(req); if (!crypto.timingSafeEqual(passwordHash(clean(input.password)), passwordHash(config.adminPassword))) { recordFailedLogin(req); return json(res, 401, { error: 'We could not sign you in. Check your password and try again.' }); } clearFailedLogins(req); const token = id(); sessions.set(token, Date.now() + sessionLifetime); res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'Set-Cookie': sessionCookie(token), 'X-Content-Type-Options': 'nosniff' }); return res.end('{"ok":true}'); }

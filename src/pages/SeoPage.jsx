@@ -3,17 +3,17 @@ import { Link, Navigate, useParams } from 'react-router-dom';
 import ServiceAreaMap from '../components/ServiceAreaMap.jsx';
 import { getViewerLocationName, useViewerLocation } from '../hooks/useViewerLocation';
 const pages = {'air-duct-cleaning':['Air Duct Cleaning','Professional Air Duct Cleaning in {loc}','A clear, thorough approach to cleaning the ductwork that serves your home or business.'],'dryer-vent-cleaning':['Dryer Vent Cleaning','Professional Dryer Vent Cleaning in {loc}','We remove lint buildup and explain what we found so you know what was cleaned.'],'chimney-cleaning':['Chimney Cleaning','Chimney Cleaning & Sweep Services in {loc}','Straightforward chimney sweeping and cleaning service with clear next steps.'],'furnace-cleaning':['Furnace Cleaning','Furnace Cleaning in {loc}','Learn what furnace and blower cleaning includes and when it may make sense.'],'carpet-cleaning':['Carpet Cleaning','Professional Carpet Cleaning in {loc}','Easy scheduling and straightforward professional carpet cleaning estimates.'],'commercial-air-duct-cleaning':['Commercial Air Duct Cleaning','Commercial Air Duct Cleaning in {loc}','Cleaning plans for offices, retail, multi-unit properties and other facilities.'],pricing:['Pricing','Straightforward pricing for cleaner air','Your estimate reflects the service, system size, access, and any approved add-ons. We explain the scope before work begins.'],'before-after':['Before & After','Real Easy Breezy before-and-after results','This gallery will feature genuine Easy Breezy job photos, grouped by service and local area as they are collected.'],'service-areas':['Service Areas','Air duct cleaning service areas in {loc}','Easy Breezy serves homeowners and businesses across {loc}.']};
-const titleize=(value='')=>value.replace(/-md$/,', MD').replace(/-/g,' ').replace(/\b\w/g,(letter)=>letter.toUpperCase());
+const titleize=(value='')=>value.replace(/-/g,' ').replace(/\b\w/g,(letter)=>letter.toUpperCase());
 export default function SeoPage({location}) {
   const params=useParams();
   const isServiceAreas=params.page==='service-areas';
   const viewerLocation=useViewerLocation();
   const hasViewerCity=viewerLocation?.city && viewerLocation.countryCode==='US';
   const viewerLocationName=hasViewerCity?getViewerLocationName(viewerLocation):'';
-  const loc=viewerLocationName||'Maryland & Washington, DC';
+  const loc=viewerLocationName||'Your Area';
   const baseItem=location?[`${titleize(params.location)} Service Area`,`Air Duct Cleaning in ${titleize(params.location)}`,`Easy Breezy provides air duct and dryer vent cleaning in and around ${titleize(params.location)}. Contact us for a clear, local estimate.`]:pages[params.page];
   const item=isServiceAreas && viewerLocationName
-    ? [baseItem?.[0], `Air Duct Cleaning Near ${viewerLocationName}`, `Easy Breezy provides air duct, dryer vent, chimney and furnace cleaning for ${viewerLocationName} and the surrounding Maryland & DC area.`]
+    ? [baseItem?.[0], `Air Duct Cleaning Near ${viewerLocationName}`, `Easy Breezy provides air duct, dryer vent, chimney and furnace cleaning for ${viewerLocationName} and the surrounding area.`]
     : baseItem && [baseItem[0], baseItem[1]?.replace('{loc}', loc), baseItem[2]?.replace('{loc}', loc)];
   const heading=item?.[1]; const intro=item?.[2];
   useEffect(()=>{if(!heading)return; document.title=`${heading} | Easy Breezy`; const description=document.querySelector('meta[name="description"]'); if(description)description.setAttribute('content',intro);},[heading,intro]);

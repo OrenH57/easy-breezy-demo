@@ -2,7 +2,7 @@ import { MapPin } from 'lucide-react';
 import { getViewerLocationName, useViewerLocation } from '../hooks/useViewerLocation';
 
 const defaultLocation = {
-  heading: 'Proudly serving Maryland & Washington, DC',
+  heading: 'Proudly serving your area',
 };
 
 export function HeroLocation() {

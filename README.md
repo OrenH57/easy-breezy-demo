@@ -17,10 +17,6 @@ This is a small full-stack service-business site. It has a public booking and ch
 
 It never stores card numbers, CVVs, or bank-account details. Use Stripe Checkout or another PCI-compliant payment provider to take payments, then retain only its receipt/reference ID here.
 
-## Add a new state
-
-Add one entry to `states.json`, with a two-letter code, the state name, its real phone number, and its service areas. Keep `enabled` set to `false` until its local content, phone routing, privacy/legal copy, and operational coverage are ready. Turn it on, then the new site is available at `/<state-code>` (for example `/nj`). All new leads and messages are tagged with that state, while the owner dashboard remains shared.
-
 ## React component map
 
 - `components/Brand.jsx`: shared Easy Breezy identity.
@@ -30,7 +26,7 @@ Add one entry to `states.json`, with a two-letter code, the state name, its real
 - `pages/Admin.jsx`: owner login and business-center UI.
 - `lib/api.js`: one API boundary used by every form and dashboard request.
 
-The public routes are `/`, `/services`, `/booking`, and `/about`. State-ready variants use `/:state`, `/:state/services`, `/:state/booking`, and `/:state/about`.
+The public routes are `/`, `/services`, `/booking`, and `/about`.
 
 ## Before launch
 

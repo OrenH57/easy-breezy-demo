@@ -38,6 +38,7 @@
     grid-area: image;
     align-self: stretch;
     min-height: 485px;
+    max-height: 620px;
     height: 100%;
     overflow: hidden;
     border-radius: 0;
@@ -242,6 +243,13 @@ footer .brand { filter: none; }
   }
 }
 
+/* The new hero photo has its mascot/wind graphic positioned toward the right
+   edge — bias the crop right (and slightly up) so it's never cut off. */
+.original-hero-image > img { object-position: 82% 28% !important; }
+@media (max-width: 650px) {
+  .original-hero-image > img { object-position: 78% 22% !important; }
+}
+
 /* Ambient leaves drifting down behind the whole page — subtle, non-interactive.
    Positioned absolute against #root (not fixed against the viewport) so they
    scroll with the page instead of hovering in place. */
@@ -358,8 +366,9 @@ footer > div:last-child { flex-wrap: wrap; row-gap: 8px; }
 /* Real before/after gallery: crew photo sits beside the section intro, like the Services page pattern.
    Flex (not grid) so the short text column doesn't get stretched to match the taller photo,
    which was leaving a big block of dead space around it. */
-.results-intro { max-width: 1180px; margin: 0 auto 34px; display: flex; align-items: center; gap: 40px; }
-.results-intro .section-top { flex: 1 1 0; min-width: 0; display: block; margin: 0; padding: 0; }
+.results-intro { max-width: 1180px; margin: 0 auto 34px; display: flex; align-items: stretch; gap: 40px; }
+.results-intro .section-top { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; justify-content: space-between; margin: 0; padding: 4px 0; }
+.results-intro .section-top p { font-size: 17px; line-height: 1.7; max-width: 46ch; }
 .results-intro .crew-photo { flex: 0 0 auto; width: min(420px, 42%); }
 .crew-photo { position: relative; margin: 0; height: 380px; border-radius: 16px; overflow: hidden; box-shadow: 0 14px 34px rgba(21, 36, 74, .14); }
 .crew-photo img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center 26%; }
@@ -373,6 +382,12 @@ footer > div:last-child { flex-wrap: wrap; row-gap: 8px; }
 }
 
 .before-after-grid { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+/* If the number of pairs is odd, don't leave the last one stranded alone in a
+   half-empty row — center it at the same width as its neighbors. */
+.before-after-pair:last-child:nth-child(odd) { grid-column: 1 / -1; justify-self: center; width: 100%; max-width: calc((100% - 20px) / 2); }
+@media (max-width: 800px) {
+  .before-after-pair:last-child:nth-child(odd) { max-width: 100%; }
+}
 .before-after-pair { border: 1px solid #e5e1f0; border-radius: 16px; background: #fff; box-shadow: 0 10px 26px rgba(25, 32, 64, .06); overflow: hidden; }
 .before-after-images { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: #e5e1f0; }
 .before-after-images figure { position: relative; margin: 0; display: flex; align-items: center; justify-content: center; background: #eef0f6; }
@@ -401,4 +416,31 @@ footer > div:last-child { flex-wrap: wrap; row-gap: 8px; }
 @media (max-width: 650px) {
   .original-services { background: #f5f2ff !important; }
   .results-section { background: #efecff !important; }
+}
+
+/* The hero quote form stacked 6 full-width fields (name, phone, email,
+   service, date, notes) one under another, making it ~760-790px tall.
+   Since it shares a grid row with the hero photo (which stretches to
+   match), that dragged the whole hero to ~1.6-2 screens of empty-feeling
+   height on both mobile and desktop before any real content appeared.
+   Pairing the short fields into two columns cuts that by roughly a third. */
+.hero-quote-card .booking {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.hero-quote-card .booking label:nth-child(1),
+.hero-quote-card .booking label:nth-child(2) { margin-top: 0; }
+.hero-quote-card .booking label + label { margin-top: 0; }
+.hero-quote-card .booking label:nth-child(5),
+.hero-quote-card .booking label:nth-child(6),
+.hero-quote-card .booking button,
+.hero-quote-card .booking .form-status {
+  grid-column: 1 / -1;
+}
+.hero-quote-card .booking textarea { min-height: 54px; }
+
+@media (max-width: 359px) {
+  .hero-quote-card .booking { grid-template-columns: 1fr; }
+  .hero-quote-card .booking label { grid-column: 1 / -1; }
 }

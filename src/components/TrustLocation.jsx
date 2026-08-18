@@ -1,12 +1,12 @@
 import { MapPin } from 'lucide-react';
-import { useViewerLocation } from '../hooks/useViewerLocation';
+import { getViewerLocationName, useViewerLocation } from '../hooks/useViewerLocation';
 
-const defaultLabel = 'Local Maryland & DC team';
+const defaultLabel = 'Your local team';
 
 export function TrustLocation() {
   const viewerLocation = useViewerLocation();
   const locationName = viewerLocation?.city && viewerLocation.countryCode === 'US'
-    ? viewerLocation.city
+    ? getViewerLocationName(viewerLocation)
     : '';
   const label = locationName ? `Local ${locationName} team` : defaultLabel;
 

@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { api, retryRequest, stateCode } from '../lib/api';
+import { api, retryRequest } from '../lib/api';
+import { useViewerLocation } from '../hooks/useViewerLocation';
 
 const services = ['Air duct cleaning', 'Dryer vent cleaning', 'Filter replacement & care', 'Chimney repair & sweep', 'Commercial cleaning'];
 
@@ -7,6 +8,7 @@ export function BookingForm({ compact = false, selectedService }) {
   const [status, setStatus] = useState('');
   const [statusType, setStatusType] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const viewerLocation = useViewerLocation();
   async function submit(event) {
     event.preventDefault();
     setStatus('');
@@ -18,9 +20,11 @@ export function BookingForm({ compact = false, selectedService }) {
       return;
     }
     const requestId = globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`;
+    const stateCode = viewerLocation?.regionCode || '';
+    const stateName = viewerLocation?.region || '';
     setSubmitting(true);
     try {
-      await retryRequest(() => api('/api/leads', { method: 'POST', headers: { 'Idempotency-Key': requestId }, body: JSON.stringify({ ...details, stateCode, requestId }) }), {
+      await retryRequest(() => api('/api/leads', { method: 'POST', headers: { 'Idempotency-Key': requestId }, body: JSON.stringify({ ...details, stateCode, stateName, requestId }) }), {
         onRetry: (attempt, retries) => setStatus(`Still trying to send your request (${attempt}/${retries})…`),
       });
       event.currentTarget.reset();

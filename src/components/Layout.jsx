@@ -14,8 +14,8 @@ export function Layout({ children }) {
   const closeMenu = () => setMenuOpen(false);
   const hasViewerCity = viewerLocation?.city && viewerLocation.countryCode === 'US';
   const locationName = hasViewerCity ? getViewerLocationName(viewerLocation) : '';
-  const utilityText = hasViewerCity ? `Air duct, dryer vent & chimney services across ${locationName}` : 'Air duct, dryer vent & chimney services across Maryland and Washington, DC';
-  const footerText = hasViewerCity ? `Professional air duct, dryer vent and chimney cleaning for ${locationName}.` : 'Professional air duct, dryer vent and chimney cleaning for Maryland and Washington, DC.';
+  const utilityText = hasViewerCity ? `Air duct, dryer vent & chimney services across ${locationName}` : 'Air duct, dryer vent & chimney services wherever you are';
+  const footerText = hasViewerCity ? `Professional air duct, dryer vent and chimney cleaning for ${locationName}.` : 'Professional air duct, dryer vent and chimney cleaning, wherever you are.';
   return <>
     <PageLeaves />
     <div className="utility" aria-live="polite">{utilityText}</div>

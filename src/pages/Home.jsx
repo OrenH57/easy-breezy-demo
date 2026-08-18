@@ -26,7 +26,7 @@ const services = [
 ];
 const beforeAfterPairs = [
   [chimneyCapBefore2, chimneyCapAfter1, 'One less way for water to get in', 'Corroded flashing meant water was working its way into the chase. A full replacement — not a patch — closes that off.'],
-  [dryerVentBefore, ductAfter, 'A real fire risk, removed', 'Years of trapped lint made this a fire hazard waiting to happen. Clear now, and the dryer runs like new.'],
+  [dryerVentBefore, ductAfter, 'A real fire risk, removed', 'Years of trapped lint made this a fire hazard waiting to happen. Clear now, and the dryer runs like new.', 'center 20%'],
   [ductBefore, dryerVentAfter, 'Air can finally move again', 'Built-up dust was choking this line. Cleared out, so conditioned air actually reaches the room it was meant for.', 'center', 'contain'],
 ];
 

@@ -366,7 +366,7 @@ footer > div:last-child { flex-wrap: wrap; row-gap: 8px; }
    Flex (not grid) so the short text column doesn't get stretched to match the taller photo,
    which was leaving a big block of dead space around it. */
 .results-intro { max-width: 1180px; margin: 0 auto 34px; display: flex; align-items: stretch; gap: 40px; }
-.results-intro .section-top { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; justify-content: space-between; margin: 0; padding: 4px 0; }
+.results-intro .section-top { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: stretch; justify-content: space-between; margin: 0; padding: 4px 0; text-align: left; }
 .results-intro .section-top p { font-size: 17px; line-height: 1.7; max-width: 46ch; }
 .results-intro .crew-photo { flex: 0 0 auto; width: min(420px, 42%); }
 .crew-photo { position: relative; margin: 0; height: 380px; border-radius: 16px; overflow: hidden; box-shadow: 0 14px 34px rgba(21, 36, 74, .14); }
@@ -442,4 +442,13 @@ footer > div:last-child { flex-wrap: wrap; row-gap: 8px; }
 @media (max-width: 359px) {
   .hero-quote-card .booking { grid-template-columns: 1fr; }
   .hero-quote-card .booking label { grid-column: 1 / -1; }
+}
+
+/* On mobile the hero stacks headline, form, then photo (instead of sitting
+   beside the photo like on desktop), so the headline/lede block reads as a
+   large flat white slab with nothing to anchor it. Tint just that block —
+   not the whole hero — so the photo's white blend gradient underneath it
+   still fades against a matching white background. */
+@media (max-width: 650px) {
+  .original-hero-copy { background: #f5f2ff; }
 }

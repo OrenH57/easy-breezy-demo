@@ -50,7 +50,7 @@ export default function Home() {
   <section className="original-services"><div className="section-top"><h2>How can we help?</h2><p>Simple, respectful service from quote to clean finish.</p></div><div className="service-card-grid">{services.map(([image, title, href, blurb]) => <article className="service-card" key={title}><img src={image} alt={title} /><div><h3>{title}</h3><p>{blurb}</p><Link className="text-link" to={href}>Learn more →</Link></div></article>)}</div></section>
   <section className="results-section">
     <div className="results-intro">
-      <div className="section-top"><h2>Real jobs, real before &amp; after.</h2><p>No stock photography and no staged photos — this is our actual work in {beforeAfterLocationText}.</p></div>
+      <div className="section-top"><h2>Real jobs, real before &amp; after.</h2><p>No stock photography and no staged photos — every picture here came from an actual job in {beforeAfterLocationText}, start to finish. If we wouldn't put our name on it, it doesn't go in this gallery.</p></div>
       <figure className="crew-photo"><img src={workerWithLogo} loading="lazy" alt="Easy Breezy technician cutting in a new duct access point, wearing the Easy Breezy logo" /><figcaption>Improving your home's air quality, one job at a time.</figcaption></figure>
     </div>
     <div className="before-after-grid">{beforeAfterPairs.map(([before, after, title, text, beforePosition, beforeFit]) => <article className="before-after-pair" key={title}>
@@ -60,6 +60,7 @@ export default function Home() {
       </div>
       <div className="before-after-caption"><strong>{title}</strong><span>{text}</span></div>
     </article>)}</div>
+    <p className="muted results-trust-note">Ask your technician to walk you through the same kind of before-and-after on your own job — we're glad to show you exactly what changed and why.</p>
   </section>
   <section className="dark-cta"><div><h2>Dirty ducts? Easy Breezy.</h2><p>Book the service that makes your home feel easier.</p></div><div className="cta-details"><span><CalendarDays /> Easy online booking</span></div><a className="button light" href="#hero-availability">Get your free estimate <span>→</span></a></section>
 </>; }

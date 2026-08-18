@@ -38,7 +38,6 @@
     grid-area: image;
     align-self: stretch;
     min-height: 485px;
-    max-height: 620px;
     height: 100%;
     overflow: hidden;
     border-radius: 0;
@@ -336,6 +335,29 @@ header .header-book { font-size: 15px !important; padding: 13px 24px !important;
 .mobile-nav .mobile-phone { color: #fff !important; }
 
 .area-links-cta { grid-column: 1 / -1 !important; justify-self: start; margin-top: 8px; }
+/* `.area-links a` (a generic link style meant for the old city-link list)
+   was overriding this button's actual .button styling — same specificity
+   fight, but the descendant selector wins by default — leaving "Get Free
+   Quote" rendered as plain purple text in a faint box instead of a solid
+   button. Restore the real button look explicitly. */
+.area-links a.area-links-cta {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 13px 26px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: linear-gradient(135deg, #7b57ef 0%, #6845e7 52%, #5634d8 100%) !important;
+  color: #fff !important;
+  font-weight: 800 !important;
+  box-shadow: 0 9px 0 #4926bc, 0 16px 26px rgba(83, 49, 209, .28) !important;
+}
+.area-links a.area-links-cta:hover {
+  background: linear-gradient(135deg, #7b57ef 0%, #6845e7 52%, #5634d8 100%) !important;
+  border-color: transparent !important;
+  color: #fff !important;
+  transform: translateY(-2px);
+}
 
 /* Footer link row was a strict single line (flex-wrap:nowrap) and overflowed
    the viewport once the email address was added — let it wrap. */
@@ -482,4 +504,9 @@ footer > div:last-child { flex-wrap: wrap; row-gap: 8px; }
   .seo-copy { padding: 44px 48px; }
   .about-layout { gap: 84px; }
   .services-intro { gap: 72px; }
+}
+
+.results-trust-note { max-width: 1180px; margin: 24px auto 0; padding: 0 20px; text-align: center; }
+@media (min-width: 651px) {
+  .results-trust-note { padding: 0; }
 }
